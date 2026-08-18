@@ -161,8 +161,24 @@ export function ChatIcon({ className }: IconProps) {
   return fa("solid", "comment", className);
 }
 
+/** Zero state's "Or start with a suggested prompt" section label (Figma
+ * node 2255:45851's own export, whose ligature fell back to literal
+ * glyph text: "comment-alt-lines") — distinct from ChatIcon's plain
+ * "comment" glyph used elsewhere. */
+export function CommentLinesIcon({ className }: IconProps) {
+  return fa("solid", "comment-alt-lines", className);
+}
+
 export function PlayCircleIcon({ className }: IconProps) {
   return fa("solid", "circle-play", className);
+}
+
+/** Zero state's "Present this page" row (Figma node 2255:45851, whose
+ * ligature fell back to literal glyph text: "volume") — a plain
+ * speaker glyph, distinct from PlayCircleIcon's play/pause transport
+ * control used elsewhere. */
+export function VolumeIcon({ className }: IconProps) {
+  return fa("solid", "volume", className);
 }
 
 export function PauseIcon({ className }: IconProps) {

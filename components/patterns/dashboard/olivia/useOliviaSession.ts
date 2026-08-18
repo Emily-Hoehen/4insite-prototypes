@@ -12,6 +12,7 @@ import {
   PRESENTER_INTRO_SLIDE,
   presenterNarration,
   reportPageUrl,
+  ServiceAnalysis,
   SummaryPageId,
 } from "./oliviaContent";
 import type { ChatMessage } from "./AskView";
@@ -95,8 +96,9 @@ export function useOliviaSession(
    * conversation itself (Figma node 2189:14169), via
    * confirmReportModalInline. "external" never touches the chat at
    * all, surfacing progress purely through ReportToast and a new tab
-   * instead, via confirmReportModal. See ReportFlowSwitcher for how
-   * this gets picked. */
+   * instead, via confirmReportModal. OliviaDashboard now hardcodes
+   * "chat" everywhere with no UI to change it — see ReportFlowVariant's
+   * own doc comment (OliviaPanel.tsx). */
   reportFlowVariant: ReportFlowVariant = "chat",
   /** Which page this session is running on (see OliviaDashboardProps'
    * own activePage) — only "Summarize page view" reads this, to pick
@@ -115,6 +117,13 @@ export function useOliviaSession(
   const [topic, setTopic] = useState<OliviaTopic | null>(initialTopic);
   const [isThinking, setIsThinking] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // The most recent showServiceAnalysis payload, kept around independently
+  // of `messages` (which showPageSummary/showServiceAnalysis both replace
+  // wholesale) — SummaryPager's "Service Summary" tab reads this so it can
+  // still flip to the last-viewed service even from an older Quality-
+  // summary message, without needing a live "serviceAnalysis" message of
+  // its own (see AskView's own lastServiceAnalysis prop).
+  const [lastServiceAnalysis, setLastServiceAnalysis] = useState<ServiceAnalysis | null>(null);
   // One shared scope for the whole session — set from wherever a mode is
   // picked (header menu, Tools menu, hub row), and it carries into chat
   // replies too, so there's a single always-current answer to "is Olivia
@@ -177,8 +186,8 @@ export function useOliviaSession(
     };
   }, []);
 
-  // Switching the report flow (see ReportFlowSwitcher) starts the panel
-  // over from a blank slate — a mid-flight checklist, generation, or
+  // Switching the report flow starts the panel over from a blank slate
+  // — a mid-flight checklist, generation, or
   // finished report from one flow has no equivalent shape in the
   // other (an inline chat message vs. a floating dialog + toast), so
   // rather than trying to translate state across, this just resets
@@ -607,6 +616,27 @@ export function useOliviaSession(
     setTopic(null);
   };
 
+  /** ServiceHistoryModal's own "click a service" trigger (Figma node
+   * 2209:42714, "Unprompted Summary - Verification Details") — same
+   * shape as showPageSummary (a single proactive Olivia message, no
+   * preceding user turn, empty `text` since the card owns all of its
+   * own copy — see AskView's own bubble render and ChatTurnActions'
+   * Copy action, which special-cases this richContent the same way it
+   * already does for "pageSummary"), just scoped to one service event
+   * instead of a whole page. Replaces (not appends to) whatever
+   * conversation was already showing — clicking a different service
+   * should read as "here's a fresh read of THIS one," not one more
+   * turn in an unrelated thread. */
+  const showServiceAnalysis = (analysis: ServiceAnalysis) => {
+    setView("ask");
+    setEntryContext({ kind: "home" });
+    setMessages([
+      { id: nextMessageId(), role: "olivia", text: "", richContent: "serviceAnalysis", serviceAnalysis: analysis },
+    ]);
+    setTopic(null);
+    setLastServiceAnalysis(analysis);
+  };
+
   return {
     view,
     setView,
@@ -653,6 +683,8 @@ export function useOliviaSession(
     startNewChat,
     resetConversation,
     showPageSummary,
+    showServiceAnalysis,
+    lastServiceAnalysis,
   };
 }
 

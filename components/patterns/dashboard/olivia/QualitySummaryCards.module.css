@@ -1,24 +1,27 @@
+/* No more flex:1/overflow-y:auto (own internal scroll region) — this
+   now lives inside SummaryPager, itself nested in an ordinary Olivia
+   reply bubble (see AskView) rather than filling the panel's log
+   directly, so it just grows with its own content like every other
+   rich card and lets the log's own scroll handle the rest. Likewise
+   .summaryIntro's own padding is gone — the bubble already provides
+   20px on every side, matching how ServiceAnalysisChatCard's heading
+   sits flush against ITS bubble, so flipping between the two via
+   SummaryPager's tabs doesn't jump insets. */
 .wrap {
   display: flex;
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  flex: 1; /* allow the summary wrapper to grow inside the panel's log */
-  min-height: 0; /* allow children with overflow to clamp properly */
 }
 
 .summaryStack {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  flex: 1; /* fill remaining vertical space */
-  min-height: 0;
-  overflow-y: auto;
-  padding-right: 8px;
 }
 
 .summaryIntro {
-  padding: 12px 16px 0 16px;
+  padding: 0;
 }
 
 .summaryIntroText {
@@ -323,67 +326,4 @@
   font-size: 9px;
   color: var(--color-text-dt-grey);
   white-space: nowrap;
-}
-
-/* ---------------- Controls ---------------- */
-
-.controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-}
-
-.dots {
-  display: flex;
-  gap: 6px;
-}
-
-.dot {
-  width: 6px;
-  height: 6px;
-  padding: 0;
-  border: none;
-  border-radius: 100px;
-  background-color: var(--color-neutral-600);
-  cursor: pointer;
-}
-
-.dotActive {
-  width: 16px;
-  background-color: var(--color-datavis-purple-100);
-}
-
-/* ---------------- After the last card ---------------- */
-
-.afterSummary {
-  display: flex;
-  gap: 8px;
-}
-
-.afterSummaryPill {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: fit-content;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 4px;
-  background-color: rgba(175, 153, 255, 0.15);
-  color: var(--color-datavis-purple-100);
-  font-family: var(--type-body-md-family);
-  font-size: 13px;
-  text-align: center;
-  cursor: pointer;
-  transition: background-color 120ms ease;
-}
-
-.afterSummaryPill:hover {
-  background-color: rgba(175, 153, 255, 0.25);
-}
-
-.afterSummaryIcon {
-  font-size: 13px;
-  line-height: 1;
 }

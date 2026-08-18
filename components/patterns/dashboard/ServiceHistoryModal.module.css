@@ -1,0 +1,522 @@
+/* ============================================================
+   "History of [asset]" — opened from a Recent Activity photo on the
+   Quality page. See ServiceHistoryModal.tsx's own doc comment for why
+   this is a blurred-backdrop lightbox rather than the app's other
+   full-screen views' opaque background.
+   ============================================================ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  background-color: rgba(15, 18, 22, 0.6);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  animation: history-fade 160ms ease both;
+  /* Matches OliviaPanel's own .panelSlot width transition exactly —
+     when its `right` inline style changes (see the component's own
+     doc comment), the two move in lockstep instead of one snapping
+     ahead of the other. */
+  transition: right 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    transition-duration: 0.01ms;
+  }
+}
+
+@keyframes history-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    animation-duration: 0.01ms;
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 100px;
+  background-color: rgba(15, 18, 22, 0.55);
+  color: var(--color-text-dt-default);
+  font-family: var(--type-h4-family);
+  font-size: var(--type-h4-size);
+  font-weight: var(--type-h4-weight);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.closeButton:hover {
+  background-color: rgba(15, 18, 22, 0.75);
+}
+
+.closeButton i,
+.closeButton svg {
+  font-size: 14px;
+}
+
+/* ---------------- Sidebar ---------------- */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: min(420px, 100vw);
+  flex-shrink: 0;
+  height: 100%;
+  padding: 28px 24px;
+  overflow-y: auto;
+  background-color: rgba(32, 39, 46, 0.92);
+  border-right: 1px solid rgba(223, 227, 230, 0.1);
+}
+
+.sidebarHead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  color: var(--color-text-dt-grey);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--type-h1-family);
+  font-size: var(--type-h1-size);
+  font-weight: var(--type-h1-weight);
+  color: var(--color-text-dt-default);
+}
+
+.subtitle {
+  margin: 0;
+  font-family: var(--type-body-md-family);
+  font-size: var(--type-body-md-size);
+  color: var(--color-text-dt-grey);
+}
+
+.divider {
+  height: 1px;
+  margin: 20px 0;
+  background-color: rgba(223, 227, 230, 0.1);
+  flex-shrink: 0;
+}
+
+.blockLabel {
+  margin: 0;
+  font-family: var(--type-h4-family);
+  font-size: var(--type-h4-size);
+  font-weight: var(--type-h4-weight);
+  color: var(--color-text-dt-grey);
+}
+
+.scheduleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scheduleHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.detailsLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-dt-blue);
+  font-family: var(--type-h4-family);
+  font-size: var(--type-body-sm-size);
+  font-weight: var(--type-h4-weight);
+}
+
+.detailsLink i,
+.detailsLink svg {
+  font-size: 13px;
+}
+
+.scheduleRow {
+  margin: 0;
+  font-family: var(--type-body-md-family);
+  font-size: var(--type-body-md-size);
+  color: var(--color-text-dt-default);
+}
+
+.scheduleRowLabel {
+  color: var(--color-text-dt-grey);
+}
+
+.statsRow {
+  display: flex;
+  gap: 24px;
+}
+
+.statBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.statLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--type-h3-family);
+  font-size: var(--type-h3-size);
+  font-weight: var(--type-h3-weight);
+  color: var(--color-text-dt-default);
+}
+
+.statLabel i,
+.statLabel svg {
+  font-size: 14px;
+  color: var(--color-text-dt-grey);
+}
+
+.statAvgGood,
+.statAvgMuted {
+  width: fit-content;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-family: var(--type-h4-family);
+  font-size: var(--type-body-sm-size);
+  font-weight: var(--type-h4-weight);
+}
+
+.statAvgGood {
+  background-color: rgba(0, 200, 137, 0.15);
+  color: var(--color-success-300);
+}
+
+.statAvgMuted {
+  background-color: var(--color-neutral-700);
+  color: var(--color-text-dt-grey);
+}
+
+/* ---------------- Timeline ---------------- */
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+}
+
+.timelineGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timelineDate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  color: var(--color-datavis-yellow-orange-500);
+  font-family: var(--type-h4-family);
+  font-size: var(--type-body-sm-size);
+  font-weight: var(--type-h4-weight);
+}
+
+.timelineDate i,
+.timelineDate svg {
+  font-size: 12px;
+}
+
+.timelineEntry {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-left: 2px solid transparent;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.timelineEntry:hover {
+  background-color: rgba(223, 227, 230, 0.05);
+}
+
+.timelineEntryActive {
+  border-left-color: var(--color-text-dt-blue);
+  background-color: rgba(223, 227, 230, 0.06);
+}
+
+.timelineEntryHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.timelineEntryIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 100px;
+  background-color: rgba(175, 153, 255, 0.15);
+  color: var(--color-datavis-purple-100);
+}
+
+.timelineEntryIcon i,
+.timelineEntryIcon svg {
+  font-size: 14px;
+}
+
+.timelineEntryName {
+  font-family: var(--type-h4-family);
+  font-size: var(--type-h4-size);
+  font-weight: var(--type-h4-weight);
+  color: var(--color-text-dt-default);
+}
+
+.timelineEntryMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 42px;
+  font-family: var(--type-body-md-family);
+  font-size: var(--type-body-sm-size);
+  color: var(--color-text-dt-grey);
+}
+
+.timelineEntryRating {
+  padding: 1px 7px;
+  border-radius: 100px;
+  background-color: rgba(0, 200, 137, 0.15);
+  color: var(--color-success-300);
+  font-family: var(--type-h4-family);
+  font-weight: var(--type-h4-weight);
+}
+
+.timelineEntryTimes {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 42px;
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  color: var(--color-text-dt-default);
+}
+
+.timelineEntryTimesLabel {
+  display: inline-block;
+  width: 64px;
+  color: var(--color-text-dt-grey);
+}
+
+/* ---------------- Main viewer + filmstrip ---------------- */
+
+.main {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 40px;
+}
+
+.viewer {
+  position: relative;
+  display: flex;
+  max-width: 100%;
+  max-height: 60vh;
+}
+
+.viewerImage {
+  display: block;
+  max-width: 100%;
+  max-height: 60vh;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: var(--shadow-dt-popup-menu);
+}
+
+.viewerAvatar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 100px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  object-fit: cover;
+}
+
+.viewerCaption {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: 100px;
+  background-color: rgba(15, 18, 22, 0.65);
+  color: var(--color-text-dt-default);
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+}
+
+.viewerCaptionIcon {
+  display: flex;
+  font-size: 12px;
+}
+
+.viewerNext {
+  position: absolute;
+  top: 50%;
+  right: -20px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 100%;
+  background-color: rgba(15, 18, 22, 0.55);
+  color: var(--color-text-dt-default);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.viewerNext:hover {
+  background-color: rgba(15, 18, 22, 0.75);
+}
+
+.filmstrip {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 900px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.filmstripItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+  width: 120px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 120ms ease;
+}
+
+.filmstripItem:hover {
+  opacity: 0.85;
+}
+
+.filmstripItemActive {
+  opacity: 1;
+}
+
+.filmstripTime {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  color: var(--color-text-dt-default);
+}
+
+.filmstripIcon {
+  display: flex;
+  font-size: 11px;
+  color: var(--color-datavis-purple-100);
+}
+
+.filmstripThumbWrap {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.filmstripItemActive .filmstripThumbWrap {
+  outline: 2px solid var(--color-text-dt-blue);
+  outline-offset: 2px;
+}
+
+.filmstripThumb {
+  display: block;
+  width: 100%;
+  height: 76px;
+  object-fit: cover;
+}
+
+.filmstripVoteUp,
+.filmstripVoteDown {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: 100px;
+  font-family: var(--type-h4-family);
+  font-size: 10px;
+  font-weight: var(--type-h4-weight);
+}
+
+.filmstripVoteUp i,
+.filmstripVoteDown i,
+.filmstripVoteUp svg,
+.filmstripVoteDown svg {
+  font-size: 9px;
+}
+
+.filmstripVoteUp {
+  background-color: rgba(0, 200, 137, 0.85);
+  color: var(--color-text-dt-default-inverted);
+}
+
+.filmstripVoteDown {
+  background-color: rgba(255, 107, 107, 0.9);
+  color: var(--color-text-dt-default-inverted);
+}
+
+@media (max-width: 860px) {
+  .sidebar {
+    display: none;
+  }
+}

@@ -96,7 +96,6 @@ export function OliviaFabModal({
   onRequestOpen,
   session,
   reportFlowVariant = "chat",
-  onViewQualitySummaryFullScreen,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -110,9 +109,6 @@ export function OliviaFabModal({
    * (useOliviaSession's own second argument), since that's what
    * actually drives pickMode/openMode's behavior. */
   reportFlowVariant?: ReportFlowVariant;
-  /** QualitySummaryCards' "View full screen" pill — see the identical
-   * prop on OliviaPanel. */
-  onViewQualitySummaryFullScreen?: () => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -255,13 +251,12 @@ export function OliviaFabModal({
                 onPickPrompt={(t, q) => session.askTopic(t, q)}
               />
             )}
-            onPrintSummary={() => window.print()}
-            onViewSummaryFullScreen={onViewQualitySummaryFullScreen}
             onViewLiveDashboardFullScreen={session.openLiveDashboardFullScreen}
             currentSummaryPageId={session.currentSummaryPageId}
             onSummarizePage={session.generatePageSummary}
             onAddCurrentViewToSummary={session.addCurrentViewToSummary}
             onResetConversation={session.resetConversation}
+            lastServiceAnalysis={session.lastServiceAnalysis}
           />
         )}
         {view === "presenter" && (

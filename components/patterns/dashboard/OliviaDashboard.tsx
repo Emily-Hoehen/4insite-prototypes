@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { RosterPerson } from "../../../lib/csv";
 import { Nav } from "../Nav";
 import {
@@ -24,29 +24,26 @@ import { QualityMegaMenu } from "./QualityMegaMenu";
 import { CommunicationCenterFullScreen } from "./CommunicationCenterFullScreen";
 import { OliviaPanel } from "./olivia/OliviaPanel";
 import type { OliviaOpenRequest, OliviaVariant, ReportFlowVariant } from "./olivia/OliviaPanel";
-import { QUALITY_PAGE_SUMMARY, type OliviaTopic } from "./olivia/oliviaContent";
+import { QUALITY_PAGE_SUMMARY, type OliviaTopic, type ServiceAnalysis } from "./olivia/oliviaContent";
 import { useOliviaSession } from "./olivia/useOliviaSession";
 import { CommunicationCenterPanel } from "./olivia/CommunicationCenterPanel";
 import type { CommCenterOpenRequest } from "./olivia/CommunicationCenterPanel";
 import { OliviaFab } from "./olivia/OliviaFab";
 import { OliviaFabModal } from "./olivia/OliviaFabModal";
 import { ALL_OLIVIA_VARIANTS, PrototypeSwitcher } from "./olivia/PrototypeSwitcher";
-import { ReportFlowSwitcher } from "./olivia/ReportFlowSwitcher";
 import styles from "./OliviaDashboard.module.css";
 
-/** Home, Safety, and Communications are separate Next.js routes (see
- * activePage), each a fresh mount of OliviaDashboard — without this,
- * the PrototypeSwitcher's selection would silently reset to the
- * default on every navigation. localStorage (not a URL param) keeps
- * this a same-browser "remember my last choice" rather than something
- * meant to be shared via link — this is a dev/review control, not
- * part of the product itself. */
+/** The /explore comparison pages' Home, Safety, and Communications are
+ * separate Next.js routes (see activePage), each still its own fresh
+ * mount of OliviaDashboard — without this, the PrototypeSwitcher's
+ * selection would silently reset to the default on every navigation.
+ * (The decided-direction pages under app/(main)/ don't hit this at
+ * all: fixedVariant is always set there, and every read/write below
+ * short-circuits on it — see setOliviaVariant's own early return.)
+ * localStorage (not a URL param) keeps this a same-browser "remember
+ * my last choice" rather than something meant to be shared via link —
+ * this is a dev/review control, not part of the product itself. */
 const PROTOTYPE_VARIANT_STORAGE_KEY = "olivia-prototype-variant";
-/** Same idea, for ReportFlowSwitcher — a separate key since it's an
- * independent axis (which "Generate a Report" experience is live),
- * not a sub-choice of the entry-point variant above. */
-const REPORT_FLOW_VARIANT_STORAGE_KEY = "olivia-report-flow-variant";
-const ALL_REPORT_FLOW_VARIANTS: ReportFlowVariant[] = ["chat", "external"];
 
 function readStoredVariant(): OliviaVariant | null {
   if (typeof window === "undefined") return null;
@@ -54,20 +51,41 @@ function readStoredVariant(): OliviaVariant | null {
   return (ALL_OLIVIA_VARIANTS as string[]).includes(stored ?? "") ? (stored as OliviaVariant) : null;
 }
 
-function readStoredReportFlowVariant(): ReportFlowVariant | null {
-  if (typeof window === "undefined") return null;
-  const stored = window.localStorage.getItem(REPORT_FLOW_VARIANT_STORAGE_KEY);
-  return (ALL_REPORT_FLOW_VARIANTS as string[]).includes(stored ?? "") ? (stored as ReportFlowVariant) : null;
+/** Same shape as OliviaDashboardProps' own `activePage`, split out so
+ * derivePageFromPathname (below) can return it without importing the
+ * props type just for this. */
+type ActivePage = "home" | "safety" | "communications" | "quality";
+
+/** Maps the current URL to `activePage` when the caller doesn't pass
+ * one explicitly — see the prop's own doc comment for which callers
+ * that is. Strips `basePath` first so this works the same under
+ * /explore as it does at the root. */
+function derivePageFromPathname(pathname: string, basePath: string): ActivePage {
+  const rest = basePath && pathname.startsWith(basePath) ? pathname.slice(basePath.length) : pathname;
+  if (rest.startsWith("/quality")) return "quality";
+  if (rest.startsWith("/safety")) return "safety";
+  if (rest.startsWith("/communications")) return "communications";
+  return "home";
 }
 
 export type OliviaDashboardProps = {
   associates: RosterPerson[];
   /** Which nav destination this is — drives the active nav link, the
    * page content below it, and the topic Olivia opens already scoped
-   * to (see `initialTopic` on OliviaPanel). */
-  activePage?: "home" | "safety" | "communications" | "quality";
+   * to (see `initialTopic` on OliviaPanel). The /explore comparison
+   * pages each still pass this explicitly (their own page.tsx per
+   * route, a fresh OliviaDashboard mount on every navigation — see
+   * PROTOTYPE_VARIANT_STORAGE_KEY's own doc comment). The
+   * decided-direction pages ("/", "/quality", "/safety") omit it
+   * instead: app/(main)/layout.tsx mounts OliviaDashboard ONCE and
+   * keeps it mounted across client-side navigation between them (so
+   * Olivia's own open/closed state and conversation survive switching
+   * pages), which means there's no one static value for a specific
+   * page.tsx to pass — derivePageFromPathname derives the current one
+   * from the URL itself on every render instead. */
+  activePage?: ActivePage;
   /** Locks `oliviaVariant` to one value and hides PrototypeSwitcher —
-   * the decided-direction pages (app/page.tsx and its siblings) pass
+   * the decided-direction pages (app/(main)/layout.tsx) pass
    * "fabPanel"; the full comparison pages (app/explore/* ) leave this
    * unset and keep the switcher. Ignores localStorage entirely when
    * set, so a lingering choice from the explore pages can't leak in. */
@@ -93,11 +111,13 @@ export type OliviaDashboardProps = {
  */
 export function OliviaDashboard({
   associates,
-  activePage = "home",
+  activePage: activePageProp,
   fixedVariant,
   basePath = "",
 }: OliviaDashboardProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const activePage = activePageProp ?? derivePageFromPathname(pathname, basePath);
   const homeHref = basePath || "/";
   const withBase = (path: string) => `${basePath}${path}`;
   const withAvatar = associates.filter((p) => p.avatar);
@@ -143,23 +163,13 @@ export function OliviaDashboard({
     if (typeof window !== "undefined") window.localStorage.setItem(PROTOTYPE_VARIANT_STORAGE_KEY, next);
   };
 
-  // Which "Generate a Report" experience is active — see
-  // ReportFlowSwitcher/ReportFlowVariant. Independent of oliviaVariant
-  // (entry point) and NOT gated by fixedVariant the way oliviaVariant
-  // is: the decided-direction home page locks its entry point (FAB +
-  // side panel only) but still exposes this switcher, so it reads/
-  // writes localStorage regardless of which page it's shown on.
-  const [reportFlowVariant, setReportFlowVariantState] = useState<ReportFlowVariant>("chat");
-
-  useEffect(() => {
-    const stored = readStoredReportFlowVariant();
-    if (stored) setReportFlowVariantState(stored);
-  }, []);
-
-  const setReportFlowVariant = (next: ReportFlowVariant) => {
-    setReportFlowVariantState(next);
-    if (typeof window !== "undefined") window.localStorage.setItem(REPORT_FLOW_VARIANT_STORAGE_KEY, next);
-  };
+  // "Generate a Report" always lands inline in the chat now — the
+  // "external" flow (a separate toast + new tab) was only ever reachable
+  // via ReportFlowSwitcher, which no longer renders anywhere; OliviaPanel/
+  // OliviaFabModal/useOliviaSession all still accept a reportFlowVariant
+  // in case that comparison is ever needed again, so this is a plain
+  // constant rather than deleting the parameter from every one of them.
+  const reportFlowVariant: ReportFlowVariant = "chat";
 
   // Option 2 (Communications Center) only — Olivia's navbar entry is
   // replaced by the Communication Center's own "Olivia" tab.
@@ -177,9 +187,22 @@ export function OliviaDashboard({
   // built for) — true for the rest of THIS page visit until whichever
   // Option 1 entry point is open first clears it, so landing on
   // Quality always re-announces it rather than only ever once per
-  // browser. Each route is its own mount (see PROTOTYPE_VARIANT_
-  // STORAGE_KEY above), so this doesn't need to watch activePage change.
+  // browser. The /explore comparison pages are still a fresh mount per
+  // route (see PROTOTYPE_VARIANT_STORAGE_KEY above), so this initial
+  // value already covers them; the decided-direction pages now share
+  // ONE persistent OliviaDashboard mount across routes (see
+  // activePage's own doc comment), so the effect just below re-arms
+  // this by hand whenever `activePage` actually changes TO "quality"
+  // instead — the same "landing on Quality" moment, just without a
+  // remount to fall back on for a fresh initial value.
   const [hasUnseenQualitySummary, setHasUnseenQualitySummary] = useState(activePage === "quality");
+  const previousActivePageRef = useRef(activePage);
+  useEffect(() => {
+    if (activePage === "quality" && previousActivePageRef.current !== "quality") {
+      setHasUnseenQualitySummary(true);
+    }
+    previousActivePageRef.current = activePage;
+  }, [activePage]);
 
   // Global entry point — the navbar avatar (panelIcons/panelContext
   // only; see showNavOliviaAvatar). No specific card in context, so
@@ -232,15 +255,6 @@ export function OliviaDashboard({
     }
   };
 
-  /** QualitySummaryCards' "View full screen" pill — closes whichever
-   * Olivia surface is open and takes the user to the real Quality page
-   * the summary was about. Shared by both OliviaPanel and OliviaFabModal. */
-  const viewQualitySummaryFullScreen = () => {
-    setIsOliviaOpen(false);
-    setIsFabModalOpen(false);
-    router.push(withBase("/quality"));
-  };
-
   /** Contextual entry point — "Open Olivia" from a trigger's popover.
    * Option 3 (Embedded Triggers) only; see the onAskOlivia/onAskQuestion
    * props below, gated to that variant. */
@@ -258,6 +272,55 @@ export function OliviaDashboard({
   const openCommCenter = () => {
     setCommCenterRequest({ requestId: Date.now(), tab: "messages" });
     setIsCommCenterOpen(true);
+  };
+
+  /** ServiceHistoryModal's own Olivia FAB — reuses whichever entry
+   * point this page's active variant already uses instead of
+   * inventing a fourth: the FAB modal's own toggle for "fab", the
+   * Communication Center for "commsCenter" (no persistent Olivia
+   * surface otherwise), and the real side panel — same as the navbar
+   * avatar/FAB use — for everything else, including "embeddedTriggers"
+   * (no persistent entry of its own either, but the panel itself still
+   * renders). */
+  const openOliviaFromOverlay =
+    oliviaVariant === "fab" ? toggleFabModal : oliviaVariant === "commsCenter" ? openCommCenter : openOliviaViaFab;
+
+  /** Whether opening Olivia from on top of ServiceHistoryModal means
+   * the real docked side panel (OliviaPanel, a flex sibling of the
+   * page that pushes it rather than overlaying it — see appShell's own
+   * doc comment) — true for every variant except "fab" (a small
+   * `position: fixed` modal floating near its own FAB) and
+   * "commsCenter" (the Communication Center panel, also `position:
+   * fixed`) — neither of those pushes layout, so there's no page-edge
+   * space to dock the overlay itself beside. Only for THIS pair does
+   * ServiceHistoryModal narrow itself to share the screen with her
+   * instead of closing when she opens (see its own `oliviaDocksBeside`
+   * prop). */
+  const oliviaDocksBeside = oliviaVariant !== "fab" && oliviaVariant !== "commsCenter";
+
+  /** ServiceHistoryModal's own "click a service" trigger — same
+   * per-variant branching as openOliviaFromOverlay, except "fab" needs
+   * its own branch here rather than reusing toggleFabModal directly:
+   * that own function's session access (fabSession) is exactly what
+   * this also needs, to actually post the analysis into her
+   * conversation rather than just opening an empty one. "commsCenter"
+   * has no session reachable from here at all (CommunicationCenterPanel
+   * owns its own, opaque to this component) — opens the Communication
+   * Center same as the plain open would, without an analysis message;
+   * a real gap, but only for a variant this prototype uses to compare
+   * entry points, not the shipped one. */
+  const analyzeServiceFromOverlay = (analysis: ServiceAnalysis) => {
+    if (oliviaVariant === "fab") {
+      setIsFabModalOpen(true);
+      fabSession.showServiceAnalysis(analysis);
+      return;
+    }
+    if (oliviaVariant === "commsCenter") {
+      openCommCenter();
+      return;
+    }
+    setIsOliviaOpen(true);
+    setOpenRequest({ kind: "home", requestId: Date.now(), serviceAnalysis: analysis });
   };
 
   /** The Communication Center's Recent Chats handing off to the real
@@ -336,13 +399,11 @@ export function OliviaDashboard({
               {activePage === "safety" ? (
                 <div className={styles.safetyPagePad}>
                   {!fixedVariant && <PrototypeSwitcher variant={oliviaVariant} onChange={setOliviaVariant} />}
-                  {!fixedVariant && <ReportFlowSwitcher variant={reportFlowVariant} onChange={setReportFlowVariant} />}
                   <SafetyPageContent reporter={goodCatchReporter} />
                 </div>
               ) : activePage === "communications" ? (
                 <div className={styles.safetyPagePad}>
                   {!fixedVariant && <PrototypeSwitcher variant={oliviaVariant} onChange={setOliviaVariant} />}
-                  {!fixedVariant && <ReportFlowSwitcher variant={reportFlowVariant} onChange={setReportFlowVariant} />}
                   <CommunicationCenterFullScreen
                     people={withAvatar}
                     onOpenNewChat={() => openChatSidePanel({ kind: "home", requestId: Date.now() })}
@@ -357,6 +418,10 @@ export function OliviaDashboard({
                     people={withAvatar}
                     variant={fixedVariant ? undefined : oliviaVariant}
                     onVariantChange={fixedVariant ? undefined : setOliviaVariant}
+                    onOpenOlivia={openOliviaFromOverlay}
+                    onAnalyzeService={analyzeServiceFromOverlay}
+                    isOliviaSidePanelOpen={oliviaDocksBeside && isOliviaOpen}
+                    oliviaDocksBeside={oliviaDocksBeside}
                   />
                 </div>
               ) : (
@@ -364,11 +429,6 @@ export function OliviaDashboard({
                   <DashboardHeader siteName="Detroit, MI (DTW)" greeting="Good morning, it’s Friday, May 5" />
 
                   {!fixedVariant && <PrototypeSwitcher variant={oliviaVariant} onChange={setOliviaVariant} />}
-                  {/* Shown on the decided-direction home page too (unlike
-                      PrototypeSwitcher above) — that page locks its entry
-                      point to FAB + side panel, but still wants this axis
-                      switchable. */}
-                  <ReportFlowSwitcher variant={reportFlowVariant} onChange={setReportFlowVariant} />
 
                   <div className={styles.stack}>
                     <PeopleSection clockedIn={clockedIn} />
@@ -405,7 +465,6 @@ export function OliviaDashboard({
             initialTopic={initialTopic}
             initialPageLabel={initialPageLabel}
             activePage={activePage}
-            onViewQualitySummaryFullScreen={viewQualitySummaryFullScreen}
             onPresenterMinimizedChange={setIsPresenterMinimized}
           />
         )}
@@ -441,7 +500,6 @@ export function OliviaDashboard({
             onRequestOpen={() => setIsFabModalOpen(true)}
             session={fabSession}
             reportFlowVariant={reportFlowVariant}
-            onViewQualitySummaryFullScreen={viewQualitySummaryFullScreen}
           />
         </>
       )}

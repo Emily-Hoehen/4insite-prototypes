@@ -107,6 +107,42 @@
   text-align: center;
 }
 
+/* ---------------- Home greeting, row hero (Figma node 2255:45851,
+   "Zero State") ----------------
+   HomeGreeting's own hero, updated to match: avatar and greeting sit
+   side by side (not stacked/centered) at a smaller 70px avatar size,
+   left-aligned. PanelContextGreeting keeps the stacked
+   .homeGreetingHero/.homeGreetingText treatment above — this is a
+   separate pair of classes rather than a modifier on those, so the
+   two greetings can't drift into each other by accident. */
+.homeGreetingHeroRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  text-align: left;
+}
+
+.homeGreetingTextRow {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 0;
+}
+
+/* Headers/H2 per Figma (Lato Black 20px) — smaller and left-aligned,
+   unlike the stacked hero's centered H1 22px .greetingHeadline. */
+.homeGreetingTextRow .greetingHeadline {
+  text-align: left;
+  font-family: var(--type-h2-family);
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.3;
+}
+
 /* The old single "For you" list (home greeting) has been replaced by
    the shared two-section OutputsAndPerformanceLists component (Figma
    node 2123:2012) — see OutputsAndPerformanceLists.module.css. */
@@ -312,6 +348,14 @@
 
 .bubbleOlivia {
   border-radius: 0 10px 10px 10px;
+}
+
+/* The "presentation stopped" bubble's own Download button sits as a
+   plain sibling of the message text inside .bubble (no flex/gap
+   container wraps them, unlike ReportPreviewCard's own .wrap) — this
+   supplies the same breathing room by hand. */
+.presentationStoppedDownload {
+  margin-top: 12px;
 }
 
 .thinking {

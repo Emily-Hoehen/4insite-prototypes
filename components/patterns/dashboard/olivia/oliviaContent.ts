@@ -642,3 +642,25 @@ export const PAGE_SUMMARY_SECTIONS: Record<SummaryPageId, PageSummarySection> = 
     ],
   },
 };
+
+/**
+ * "Unprompted Summary - Verification Details" (Figma node 2209:42714)
+ * — Olivia's own proactive read of a single clicked service event, not
+ * a page-level summary. Owned here (not by ServiceHistoryModal, the
+ * only current caller) for the same reason SummaryPageId/
+ * PageSummarySection are — a plain-data payload a page-level component
+ * builds and hands to useOliviaSession's own showServiceAnalysis,
+ * which this whole file's session/message layer needs to know the
+ * shape of. `type` is a plain display string rather than
+ * QualityPageContent's own ActivityType — this file has no business
+ * importing a page component's types, and the three values line up by
+ * spelling alone (see ServiceAnalysisChatCard's own icon lookup). */
+export type ServiceAnalysis = {
+  areaName: string;
+  type: string;
+  timeLabel: string;
+  personName: string;
+  personRole: string;
+  personAvatar?: string;
+  summary: string;
+};

@@ -10,7 +10,8 @@ export type SafetyPageContentProps = {
 };
 
 /**
- * The "Safety" nav link's destination (app/safety/page.tsx). Built from
+ * The "Safety" nav link's destination (app/(main)/safety, rendered by
+ * OliviaDashboard from app/(main)/layout.tsx). Built from
  * a provided screenshot rather than a Figma node — no Figma reference
  * existed for this specific page, so colors/spacing are reasoned from
  * the screenshot and this project's existing DS2 tokens/card

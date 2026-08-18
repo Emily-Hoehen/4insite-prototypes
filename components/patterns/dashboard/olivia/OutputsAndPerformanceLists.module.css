@@ -135,7 +135,9 @@
   gap: 12px;
   min-width: 0;
   padding: 20px 12px;
-  border: none;
+  /* Figma node 2255:45851 borders these (unlike the pill list below
+     it, which stays borderless). */
+  border: 1px solid var(--color-neutral-700);
   border-radius: 4px;
   background-color: var(--color-neutral-850);
   cursor: pointer;
@@ -164,38 +166,71 @@
 
 /* One shared purple tint across HomeGreeting's site-level cards —
    the per-mode swatch colors (mode.swatch) are only used by this
-   component's own "list" output section above. */
+   component's own "list" output section above. Superseded by the
+   per-item tints just below (Figma node 2255:45851) but kept in case
+   a future caller wants the old uniform treatment back. */
 .outputCardIconUniform {
   composes: outputCardIcon;
   background-color: rgba(175, 153, 255, 0.15);
   color: var(--color-datavis-purple-100);
 }
 
+/* Per-item accent tints for HomeGreeting's zero state (Figma node
+   2255:45851) — each site-level card and page-level/performance pill
+   gets its own color instead of one uniform purple. The alpha-tinted
+   background isn't itself a token (DS2 has no 15%-opacity variant of
+   these), same reasoning as .suggestIconUniform's tint above; the
+   solid color is var(--color-datavis-*-100) exactly. */
+.outputCardIconTeal {
+  composes: outputCardIcon;
+  background-color: rgba(128, 255, 231, 0.15);
+  color: var(--color-datavis-teal-100);
+}
+
+.outputCardIconYellowOrange {
+  composes: outputCardIcon;
+  background-color: rgba(255, 201, 128, 0.15);
+  color: var(--color-datavis-yellow-orange-100);
+}
+
+/* Roboto Medium per Figma — same weight as .promptPill's own label,
+   not the plain-body weight this used to inherit. */
 .outputCardLabel {
   margin: 0;
   width: 100%;
   color: var(--color-text-dt-default);
-  font-family: var(--type-body-md-family);
+  font-family: var(--type-h4-family);
   font-size: 14px;
-  line-height: var(--type-body-md-leading);
+  font-weight: var(--type-h4-weight);
+  line-height: 20px;
   text-align: center;
 }
 
 /* HomeGreeting's section labels carry a small leading icon (globe/
    page-layout/comment) that this component's own plain-text
    .sectionLabel doesn't need. */
+/* Header/H4 (bold), white — not .sectionLabel's own smaller grey body
+   text — per the user's request for HomeGreeting's own group headers
+   ("Generate site level outputs", "View page level insights", "Or
+   start with a suggested prompt"). Overrides composed .sectionLabel's
+   font/color directly rather than editing that shared class, since
+   OutputsAndPerformanceLists' own callers still use the grey style. */
 .sectionLabelWithIcon {
   composes: sectionLabel;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-family: var(--type-h4-family);
+  font-size: 14px;
+  font-weight: var(--type-h4-weight);
+  color: var(--color-text-dt-default);
 }
 
 .sectionLabelWithIcon i,
 .sectionLabelWithIcon svg {
   font-size: 13px;
   line-height: 1;
-  color: var(--color-datavis-purple-100);
+  color: var(--color-text-dt-default);
 }
 
 .pillList {
@@ -228,6 +263,38 @@
 
 .promptPill:hover {
   background-color: rgba(175, 153, 255, 0.25);
+}
+
+/* Same per-item tinting as .outputCardIconTeal/.outputCardIconYellowOrange
+   above, applied to a whole pill (bg + text + icon, which inherits
+   `color` from its parent) rather than just an icon well — matches
+   Figma's page-level rows, each tinted its own color instead of
+   .promptPill's default uniform purple. */
+.promptPillSkyBlue {
+  composes: promptPill;
+  background-color: rgba(128, 230, 255, 0.15);
+  color: var(--color-datavis-sky-blue-100);
+}
+.promptPillSkyBlue:hover {
+  background-color: rgba(128, 230, 255, 0.25);
+}
+
+.promptPillRedOrange {
+  composes: promptPill;
+  background-color: rgba(255, 138, 128, 0.15);
+  color: var(--color-datavis-red-orange-100);
+}
+.promptPillRedOrange:hover {
+  background-color: rgba(255, 138, 128, 0.25);
+}
+
+.promptPillPinkle {
+  composes: promptPill;
+  background-color: rgba(217, 128, 255, 0.15);
+  color: var(--color-datavis-pinkle-100);
+}
+.promptPillPinkle:hover {
+  background-color: rgba(217, 128, 255, 0.25);
 }
 
 .promptPillIcon {

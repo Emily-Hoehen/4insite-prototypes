@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef } from "react";
 import { BullhornIcon, CloseIcon, FinancialsIcon, PdfIcon, RotateLeftIcon } from "../../icons";
-import { OliviaScope, OliviaTopic, TOPIC_SUGGESTED_PROMPTS } from "./oliviaContent";
+import { OliviaScope, OliviaTopic, ServiceAnalysis, TOPIC_SUGGESTED_PROMPTS } from "./oliviaContent";
 import { AskView } from "./AskView";
 import { PresenterView } from "./PresenterView";
 import { ModeMenuButton } from "./ModeMenuButton";
@@ -31,9 +31,13 @@ export type OliviaView = "ask" | "presenter" | "report" | "dashboard";
 
 /** Which "Generate a Report" experience is active — see the doc
  * comment on useOliviaSession's `reportFlowVariant` parameter for what
- * each one means, and ReportFlowSwitcher for the control that picks
- * it. Independent of OliviaVariant (entry point) — either report flow
- * can pair with any entry point. */
+ * each one means. OliviaDashboard now hardcodes this to "chat" (the
+ * decided direction) with no UI to change it — the switcher that used
+ * to pick it (ReportFlowSwitcher) has been removed — but the type and
+ * the "external" branches it still selects are left in place rather
+ * than torn out of OliviaPanel/useOliviaSession, in case that
+ * comparison is ever needed again. Independent of OliviaVariant (entry
+ * point) — either report flow can pair with any entry point. */
 export type ReportFlowVariant = "chat" | "external";
 
 /**
@@ -148,12 +152,19 @@ export type OliviaEntryContext = { kind: "home" } | { kind: "topic"; topic: Oliv
  * summary (e.g. Quality's) the nav avatar opens straight to instead
  * of its usual greeting, the first time it's clicked after landing on
  * a page that has one ready (see OliviaDashboard's notification dot).
+ * `serviceAnalysis` is the same idea scoped to one clicked service
+ * event instead of a whole page — ServiceHistoryModal's own trigger
+ * (see OliviaDashboard's analyzeServiceFromOverlay), same priority as
+ * `pageSummary`; the two are mutually exclusive by construction (never
+ * both set on the same request), so their relative order below doesn't
+ * matter.
  */
 export type OliviaOpenRequest = OliviaEntryContext & {
   requestId: number;
   questionText?: string;
   resumeReply?: string;
   pageSummary?: string;
+  serviceAnalysis?: ServiceAnalysis;
 };
 
 export function OliviaPanel({
@@ -166,7 +177,6 @@ export function OliviaPanel({
   initialTopic = null,
   initialPageLabel,
   activePage = "home",
-  onViewQualitySummaryFullScreen,
   onPresenterMinimizedChange,
 }: {
   isOpen: boolean;
@@ -205,11 +215,6 @@ export function OliviaPanel({
    * "Summarize page view" reads this (see useOliviaSession), to pick
    * which PAGE_SUMMARY_SECTIONS entry "the current view" means. */
   activePage?: "home" | "safety" | "communications" | "quality";
-  /** QualitySummaryCards' "View full screen" pill — closes this panel
-   * and navigates to the real Quality page (see OliviaDashboard, which
-   * owns the router). Optional since only "panelIcons"/"panelContext"
-   * ever show that card in the first place. */
-  onViewQualitySummaryFullScreen?: () => void;
   /** Fires whenever the mini presenter bar's own visibility would
    * change (panel closed while still on the presenter view) — lets
    * "fabPanel" (the only variant with a FAB of its own to worry about)
@@ -261,7 +266,9 @@ export function OliviaPanel({
   useEffect(() => {
     if (!openRequest || lastHandledRequestId.current === openRequest.requestId) return;
     lastHandledRequestId.current = openRequest.requestId;
-    if (openRequest.pageSummary) {
+    if (openRequest.serviceAnalysis) {
+      session.showServiceAnalysis(openRequest.serviceAnalysis);
+    } else if (openRequest.pageSummary) {
       // Quality's is the only proactive page summary in this
       // prototype, so its rich-card treatment is hardcoded here rather
       // than threaded through OliviaOpenRequest as a general-purpose flag.
@@ -411,13 +418,12 @@ export function OliviaPanel({
                     )
                   : undefined
               }
-              onPrintSummary={() => window.print()}
-              onViewSummaryFullScreen={onViewQualitySummaryFullScreen}
               onViewLiveDashboardFullScreen={session.openLiveDashboardFullScreen}
               currentSummaryPageId={session.currentSummaryPageId}
               onSummarizePage={session.generatePageSummary}
               onAddCurrentViewToSummary={session.addCurrentViewToSummary}
               onResetConversation={session.resetConversation}
+              lastServiceAnalysis={session.lastServiceAnalysis}
             />
           )}
           {view === "presenter" && (

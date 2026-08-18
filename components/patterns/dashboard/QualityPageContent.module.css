@@ -316,6 +316,31 @@
   height: 140px;
   border-radius: 6px;
   object-fit: cover;
+  transition: filter 120ms ease;
+}
+
+/* Wraps .activityPhoto when it opens ServiceHistoryModal — a plain
+   reset button, not a new visual treatment, plus a subtle hover/focus
+   dim on the photo itself (below) so it reads as clickable without
+   competing with the card's own hover state. */
+.activityPhotoButton {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.activityPhotoButton:hover .activityPhoto,
+.activityPhotoButton:focus-visible .activityPhoto {
+  filter: brightness(1.08);
+}
+
+.activityPhotoButton:focus-visible {
+  outline: 2px solid var(--color-datavis-purple-100);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 /* ---------------- Stats line ---------------- */
