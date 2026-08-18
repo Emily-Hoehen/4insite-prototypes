@@ -1,6 +1,7 @@
 "use client";
 
 import { MouseEvent, ReactNode } from "react";
+import Link from "next/link";
 import styles from "./Nav.module.css";
 
 /**
@@ -164,7 +165,7 @@ export function Nav({
                   .filter(Boolean)
                   .join(" ")}
               >
-                <a
+                <Link
                   href={link.href}
                   className={[styles.link, link.active ? styles.linkActive : ""]
                     .filter(Boolean)
@@ -172,7 +173,7 @@ export function Nav({
                   aria-current={link.active ? "page" : undefined}
                 >
                   {link.label}
-                </a>
+                </Link>
                 {link.megaMenu && <div className={styles.megaMenu}>{link.megaMenu}</div>}
               </li>
             ))}

@@ -34,10 +34,11 @@
   transition: background-color 120ms ease;
 }
 
-/* Primary (solid) action — stays full-width-in-its-half via flex: 1;
-   only the secondary/ghost button beside it (.viewFullScreenButton)
-   hugs its own content, per the "secondary buttons hug their content"
-   pass across every ghost-purple button in this file tree. */
+/* Both buttons split the row evenly (flex: 1 each) so together they
+   run edge-to-edge with the chat bubble instead of
+   .viewFullScreenButton hugging its own "View Full Screen" + icon
+   content — that used to overflow past the bubble's own max-width in
+   a narrow panel, clipping the button's right edge. */
 .exportButton {
   flex: 1;
   background-color: var(--color-datavis-purple-100);
@@ -49,8 +50,7 @@
 }
 
 .viewFullScreenButton {
-  flex: 0 0 auto;
-  width: fit-content;
+  flex: 1;
   background-color: rgba(175, 153, 255, 0.15);
   color: var(--color-datavis-purple-100);
 }

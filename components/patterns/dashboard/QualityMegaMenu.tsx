@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styles from "./QualityMegaMenu.module.css";
 
 type Group = { title: string; items: string[] };
@@ -55,20 +56,20 @@ export function QualityMegaMenu({ basePath = "" }: { basePath?: string }) {
               return (
                 <div key={group.title} className={styles.group}>
                   {isScopeOfWork ? (
-                    <a href={qualityHref} className={styles.groupTitle} style={{ textDecoration: "none" }}>
+                    <Link href={qualityHref} className={styles.groupTitle} style={{ textDecoration: "none" }}>
                       {group.title}
-                    </a>
+                    </Link>
                   ) : (
                     <p className={styles.groupTitle}>{group.title}</p>
                   )}
                   {group.items.map((item) => (
-                    <a
+                    <Link
                       key={item}
                       href={isScopeOfWork ? qualityHref : "#"}
                       className={styles.groupLink}
                     >
                       {item}
-                    </a>
+                    </Link>
                   ))}
                 </div>
               );
@@ -83,9 +84,9 @@ export function QualityMegaMenu({ basePath = "" }: { basePath?: string }) {
           Quality is leaving no stone unturned. From scoring the entire site with customer feedback to keeping up on
           the stack by making necessary adjustments, Quality is where we get the job done.
         </p>
-        <a href={qualityHref} className={styles.asideLink}>
+        <Link href={qualityHref} className={styles.asideLink}>
           More Help
-        </a>
+        </Link>
       </div>
     </div>
   );

@@ -112,7 +112,7 @@ const COMPLETION_MAX = 40;
  * only" figure, same as how the real Quality page's own "All" vs.
  * "Verifications" filter chips would show different totals.
  */
-export function QualitySummaryCards({ onPrint, onViewFullScreen }: { onPrint?: () => void; onViewFullScreen?: () => void }) {
+export function QualitySummaryCards() {
   return (
     <div className={styles.wrap}>
       <div className={styles.summaryIntro}>
@@ -242,15 +242,6 @@ export function QualitySummaryCards({ onPrint, onViewFullScreen }: { onPrint?: (
             </div>
           </div>
         </div>
-      </div>
-
-      <div className={styles.afterSummary}>
-        <button type="button" className={styles.afterSummaryPill} onClick={() => onPrint?.()}>
-          Print this summary
-        </button>
-        <button type="button" className={styles.afterSummaryPill} onClick={() => onViewFullScreen?.()}>
-          View full screen
-        </button>
       </div>
     </div>
   );

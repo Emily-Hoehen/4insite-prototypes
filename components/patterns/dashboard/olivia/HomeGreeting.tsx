@@ -1,27 +1,29 @@
 "use client";
 
-import { BullhornIcon, ChatIcon, FinancialsIcon, GlobeIcon, ListIcon, PageIcon, PdfIcon, PlayCircleIcon } from "../../icons";
+import { BullhornIcon, CommentLinesIcon, FinancialsIcon, GlobeIcon, ListIcon, PageIcon, PdfIcon, VolumeIcon } from "../../icons";
 import { SUGGESTED_PROMPTS, type OliviaScope, type OliviaTopic, type SuggestedPrompt } from "./oliviaContent";
 import type { OliviaView } from "./OliviaPanel";
 import { OliviaAvatar } from "./OliviaAvatar";
-import { TopicIcon } from "./TopicIcon";
 import styles from "./OliviaViews.module.css";
 import outputStyles from "./OutputsAndPerformanceLists.module.css";
 
 /**
- * "panelIcons"'s zero-state — a 108px avatar hero, then three
- * sections: two site-level outputs (offline report, site
- * presentation) as cards, three page-level outputs (summarize, live
- * dashboard, present — all scoped to *this* page) as a pill list, and
- * the usual suggested-prompts pill list. Each mode/scope pair gets
- * its own dedicated card or row here rather than one button plus a
- * "this page or the whole site?" menu — the explicit split doesn't
- * fit OutputsAndPerformanceLists' one-list-of-modes shape (used by
+ * "panelIcons"'s zero-state, per Figma node 2255:45851 ("Zero
+ * State") — a 70px avatar + greeting hero row, then three sections:
+ * two site-level outputs (offline report, site presentation) as
+ * cards, three page-level outputs (summarize, live dashboard,
+ * present — all scoped to *this* page) as a pill list, and the usual
+ * suggested-prompts pill list. Each mode/scope pair gets its own
+ * dedicated card or row here rather than one button plus a "this
+ * page or the whole site?" menu — the explicit split doesn't fit
+ * OutputsAndPerformanceLists' one-list-of-modes shape (used by
  * PanelContextGreeting, unchanged), so this screen's markup is
  * bespoke; it reuses that file's own card/pill CSS classes directly
  * rather than duplicating the same visual language in a second
  * stylesheet — see OutputsAndPerformanceLists.module.css's own doc
- * comment on those classes.
+ * comment on those classes. Every card/pill below carries its own
+ * accent color (teal/yellow-orange/sky-blue/red-orange/pinkle) per
+ * the Figma reference, rather than one uniform purple.
  */
 export function HomeGreeting({
   onPickTopic,
@@ -48,43 +50,47 @@ export function HomeGreeting({
 }) {
   return (
     <div className={styles.homeGreeting}>
-      <div className={styles.homeGreetingHero}>
-        <OliviaAvatar size={108} alt="Olivia" />
+      <div className={styles.homeGreetingHeroRow}>
+        <OliviaAvatar size={70} alt="Olivia" />
 
-        <div className={styles.homeGreetingText}>
-          <p className={styles.greetingHeadline}>Hi Emily, how can I help you today?</p>
+        <div className={styles.homeGreetingTextRow}>
+          <p className={styles.greetingHeadline}>
+            Hi Emily,
+            <br />
+            how can I help you today?
+          </p>
         </div>
       </div>
 
       <div className={outputStyles.listsGroup}>
         <div className={outputStyles.section}>
           <p className={outputStyles.sectionLabelWithIcon}>
-            <GlobeIcon /> Generate an output at the site level
+            <GlobeIcon /> Generate site level outputs
           </p>
           <div className={outputStyles.outputGrid}>
             <button type="button" className={outputStyles.outputCard} onClick={() => onOpenMode("report", "site")}>
-              <span className={outputStyles.outputCardIconUniform}>
+              <span className={outputStyles.outputCardIconTeal}>
                 <PdfIcon />
               </span>
-              <span className={outputStyles.outputCardLabel}>Generate an offline report</span>
+              <span className={outputStyles.outputCardLabel}>Offline Report</span>
             </button>
             <button type="button" className={outputStyles.outputCard} onClick={() => onOpenMode("presenter", "site")}>
-              <span className={outputStyles.outputCardIconUniform}>
+              <span className={outputStyles.outputCardIconYellowOrange}>
                 <BullhornIcon />
               </span>
-              <span className={outputStyles.outputCardLabel}>Begin an Olivia site presentation</span>
+              <span className={outputStyles.outputCardLabel}>Site Presentation</span>
             </button>
           </div>
         </div>
 
         <div className={outputStyles.section}>
           <p className={outputStyles.sectionLabelWithIcon}>
-            <PageIcon /> Generate page level outputs
+            <PageIcon /> View page level insights
           </p>
           <div className={outputStyles.pillList}>
             <button
               type="button"
-              className={outputStyles.promptPill}
+              className={outputStyles.promptPillSkyBlue}
               onClick={() => onSummarizePage?.()}
             >
               <span className={outputStyles.promptPillIcon}>
@@ -92,15 +98,15 @@ export function HomeGreeting({
               </span>
               Summarize page view
             </button>
-            <button type="button" className={outputStyles.promptPill} onClick={() => onOpenMode("dashboard", "page")}>
+            <button type="button" className={outputStyles.promptPillRedOrange} onClick={() => onOpenMode("dashboard", "page")}>
               <span className={outputStyles.promptPillIcon}>
                 <FinancialsIcon />
               </span>
-              Generate live dashboard of page view
+              Live dashboard of page view
             </button>
-            <button type="button" className={outputStyles.promptPill} onClick={() => onOpenMode("presenter", "page")}>
+            <button type="button" className={outputStyles.promptPillPinkle} onClick={() => onOpenMode("presenter", "page")}>
               <span className={outputStyles.promptPillIcon}>
-                <PlayCircleIcon />
+                <VolumeIcon />
               </span>
               Present this page
             </button>
@@ -109,7 +115,7 @@ export function HomeGreeting({
 
         <div className={outputStyles.section}>
           <p className={outputStyles.sectionLabelWithIcon}>
-            <ChatIcon /> {performanceLabel}
+            <CommentLinesIcon /> {performanceLabel}
           </p>
           <div className={outputStyles.pillList}>
             {promptSet.map((prompt) => (
@@ -119,9 +125,6 @@ export function HomeGreeting({
                 className={outputStyles.promptPill}
                 onClick={() => onPickTopic(prompt.topic, prompt.question)}
               >
-                <span className={outputStyles.promptPillIcon}>
-                  <TopicIcon topic={prompt.topic} />
-                </span>
                 {prompt.label}
               </button>
             ))}

@@ -1,0 +1,44 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Full-width segmented control spanning the bubble — one tinted
+   background, the active tab lifted out of it in the ghost-purple
+   treatment this whole file tree uses for "the thing you're currently
+   on" (same rgba(175,153,255,…) used for secondary buttons elsewhere). */
+.tabs {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+  padding: 2px;
+  border-radius: 8px;
+  background-color: var(--color-neutral-900);
+}
+
+.tab {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--color-text-dt-grey);
+  font-family: var(--type-h4-family);
+  font-size: var(--type-body-sm-size);
+  font-weight: var(--type-h4-weight);
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.tab:hover {
+  color: var(--color-text-dt-default);
+}
+
+.tabActive,
+.tabActive:hover {
+  background-color: rgba(175, 153, 255, 0.15);
+  color: var(--color-datavis-purple-100);
+}

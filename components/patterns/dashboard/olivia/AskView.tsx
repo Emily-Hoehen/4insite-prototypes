@@ -1,11 +1,12 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { CloseIcon, FileChartIcon, FinancialsIcon, ListIcon, MicrophoneIcon, PageIcon, PlayCircleIcon } from "../../icons";
+import { CloseIcon, FileChartIcon, FinancialsIcon, ListIcon, MicrophoneIcon, PageIcon, VolumeIcon } from "../../icons";
 import {
   OfflineReportFeature,
   OliviaScope,
   OliviaTopic,
+  ServiceAnalysis,
   SummaryPageId,
   TOPIC_LABEL,
   TOPIC_SUGGESTED_PROMPTS,
@@ -17,8 +18,9 @@ import { HomeGreeting } from "./HomeGreeting";
 import { LiveDashboardPreviewCard } from "./LiveDashboardChatCard";
 import { OliviaAvatar } from "./OliviaAvatar";
 import { PageSummaryChatCard, summaryAsText } from "./PageSummaryChatCard";
-import { QualitySummaryCards } from "./QualitySummaryCards";
 import { ReportPreviewCard } from "./ReportChatCard";
+import { serviceAnalysisAsText } from "./ServiceAnalysisChatCard";
+import { SummaryPager } from "./SummaryPager";
 import styles from "./OliviaViews.module.css";
 import outputStyles from "./OutputsAndPerformanceLists.module.css";
 // The stopped-presentation reply's Download button (Figma node
@@ -64,14 +66,19 @@ export type ChatMessage = {
    *    2209:36698/2209:36788. `text` is unused for this one; the
    *    content itself is derived from `summaryPageIds` at render time
    *    (see PageSummaryChatCard) so "Add current view to summary" can
-   *    grow it without rebuilding a snapshot string by hand. */
+   *    grow it without rebuilding a snapshot string by hand.
+   *  - "serviceAnalysis": ServiceHistoryModal's own "click a service"
+   *    trigger (see useOliviaSession's showServiceAnalysis) — Olivia's
+   *    unprompted read of one specific service event, Figma node
+   *    2209:42714. Needs `serviceAnalysis` alongside it. */
   richContent?:
     | "qualitySummary"
     | "report"
     | "reportGenerating"
     | "presentationStopped"
     | "liveDashboard"
-    | "pageSummary";
+    | "pageSummary"
+    | "serviceAnalysis";
   /** Only set alongside richContent: "report" — which features the
    * Offline Report checklist had selected when this was generated. */
   reportFeatures?: OfflineReportFeature[];
@@ -79,6 +86,8 @@ export type ChatMessage = {
    * section currently folded into this one reply, in the order they
    * were added. */
   summaryPageIds?: SummaryPageId[];
+  /** Only set alongside richContent: "serviceAnalysis". */
+  serviceAnalysis?: ServiceAnalysis;
 };
 
 export function AskView({
@@ -94,13 +103,12 @@ export function AskView({
   onSelectPrompt,
   onOpenMode,
   renderZeroState,
-  onPrintSummary,
-  onViewSummaryFullScreen,
   onViewLiveDashboardFullScreen,
   currentSummaryPageId = "home",
   onSummarizePage,
   onAddCurrentViewToSummary,
   onResetConversation,
+  lastServiceAnalysis,
 }: {
   variant: OliviaPanelVariant;
   entryContext: OliviaEntryContext;
@@ -136,10 +144,6 @@ export function AskView({
    * greeting (Figma node 2085:1498) uses this to reuse AskView's
    * message log + composer without inheriting its greeting screen. */
   renderZeroState?: () => React.ReactNode;
-  /** QualitySummaryCards' own controls, once its last card is reached —
-   * only meaningful for a message with richContent: "qualitySummary". */
-  onPrintSummary?: () => void;
-  onViewSummaryFullScreen?: () => void;
   /** LiveDashboardPreviewCard's "View Full Screen" — only meaningful for
    * a message with richContent: "liveDashboard". */
   onViewLiveDashboardFullScreen?: () => void;
@@ -154,19 +158,45 @@ export function AskView({
    * ChatTurnActions) — reset here is the same action as the header's
    * own reset control, just repeated at the point of each reply. */
   onResetConversation: () => void;
+  /** SummaryPager's own "the other tab" data — the most recently
+   * analyzed service, independent of which of "qualitySummary"/
+   * "serviceAnalysis" THIS message's own richContent is (see
+   * useOliviaSession's own lastServiceAnalysis and SummaryPager's own
+   * doc comment). */
+  lastServiceAnalysis?: ServiceAnalysis | null;
 }) {
   const [draft, setDraft] = useState("");
   const [pageLabelVisible, setPageLabelVisible] = useState(true);
   const [toolsOpen, setToolsOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const toolsRef = useRef<HTMLDivElement>(null);
+  // The last message row, whichever speaker it is — see the scroll
+  // effect just below, which needs to reach it directly rather than
+  // always scrolling the log container to its own bottom.
+  const lastMessageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Don't auto-scroll when Olivia's proactive Quality summary is shown;
-    // leave the user's current scroll position so they can inspect the
-    // stacked cards without being pushed to the bottom.
+    // Don't auto-scroll when Olivia's proactive Quality summary — or a
+    // single service's own unprompted analysis, same reasoning — is
+    // shown; leave the user's current scroll position (in practice,
+    // the top, since both replace the whole log with one fresh
+    // message) so they land on the heading instead of being pushed
+    // straight to the bottom of a card they haven't read yet.
     const last = messages[messages.length - 1];
-    if (last?.richContent === "qualitySummary") return;
+    if (last?.richContent === "qualitySummary" || last?.richContent === "serviceAnalysis") return;
+
+    if (last?.role === "olivia" && !isThinking) {
+      // A finished Olivia reply scrolls to the TOP of her own turn
+      // (name/avatar row, then the bubble) rather than the bottom of
+      // the whole log — the old scrollTo(scrollHeight) below would
+      // land on the tail end of a long reply (or its follow-up pills)
+      // instead of where it actually starts.
+      lastMessageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    // The user's own just-sent message, and the thinking indicator
+    // that follows it, both still scroll to the bottom — the standard
+    // "show me what I just did" beat before Olivia's reply lands.
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, isThinking]);
 
@@ -246,6 +276,7 @@ export function AskView({
               return (
                 <div
                   key={message.id}
+                  ref={isLast ? lastMessageRef : undefined}
                   className={[styles.bubbleRow, isUser ? styles.bubbleRowUser : styles.bubbleRowOlivia].join(" ")}
                 >
                   {isUser ? (
@@ -264,71 +295,72 @@ export function AskView({
                           2054:126); the follow-up pills below are a second,
                           16px-gap sibling within the same turn (2054:125) — see
                           .bubbleRowOlivia's own gap in OliviaViews.module.css. */}
-                      {message.richContent === "qualitySummary" ? (
-                        // For the proactive Quality page summary we only show
-                        // the rich charts content (no leading Olivia text bubble)
-                        <QualitySummaryCards
-                          onPrint={() => onPrintSummary?.()}
-                          onViewFullScreen={() => onViewSummaryFullScreen?.()}
-                        />
-                      ) : (
-                        <div className={styles.oliviaTurnBody}>
-                          <div className={styles.oliviaMessageHead}>
-                            <OliviaAvatar size={36} />
-                            <p className={styles.oliviaMessageName}>Olivia</p>
-                          </div>
-                          <div className={[styles.bubble, styles.bubbleOlivia].join(" ")}>
-                            {message.richContent === "reportGenerating" ? (
-                              <span className={styles.reportGeneratingRow}>
-                                <span className={styles.reportGeneratingSpinner} aria-hidden="true" />
-                                {message.text}
-                              </span>
-                            ) : (
-                              message.text
-                            )}
-                            {/* A finished report lives inside Olivia's own reply
-                                bubble (Figma node 2189:13896) — a preview card,
-                                not a separate panel view. */}
-                            {message.richContent === "report" && (
-                              <ReportPreviewCard
-                                topic={message.topic ?? null}
-                                features={message.reportFeatures ?? []}
-                              />
-                            )}
-                            {/* Stopping a presentation still leaves the
-                                download action reachable — same button
-                                PresenterView's own footer had. */}
-                            {message.richContent === "presentationStopped" && (
-                              <button
-                                type="button"
-                                className={reportCardStyles.downloadButton}
-                                onClick={() => window.print()}
-                              >
-                                Download Presentation Report
-                              </button>
-                            )}
-                            {/* Same placement as the report/presentation-stopped
-                                cards above — the dashboard preview lives inside
-                                Olivia's own reply bubble, not a separate panel view. */}
-                            {message.richContent === "liveDashboard" && (
-                              <LiveDashboardPreviewCard onViewFullScreen={() => onViewLiveDashboardFullScreen?.()} />
-                            )}
-                            {/* Same placement again — the summary itself lives
-                                inside Olivia's own reply bubble. Copy/reset/
-                                rate live outside the bubble now (see
-                                ChatTurnActions below), so this card only owns
-                                its own two actions (Download, Add current
-                                view). */}
-                            {message.richContent === "pageSummary" && (
-                              <PageSummaryChatCard
-                                summaryPageIds={message.summaryPageIds ?? []}
-                                currentSummaryPageId={currentSummaryPageId}
-                                onAddCurrentView={() => onAddCurrentViewToSummary?.()}
-                              />
-                            )}
-                          </div>
+                      <div className={styles.oliviaTurnBody}>
+                        <div className={styles.oliviaMessageHead}>
+                          <OliviaAvatar size={36} />
+                          <p className={styles.oliviaMessageName}>Olivia</p>
                         </div>
-                      )}
+                        <div className={[styles.bubble, styles.bubbleOlivia].join(" ")}>
+                          {message.richContent === "reportGenerating" ? (
+                            <span className={styles.reportGeneratingRow}>
+                              <span className={styles.reportGeneratingSpinner} aria-hidden="true" />
+                              {message.text}
+                            </span>
+                          ) : message.richContent === "pageSummary" ||
+                            message.richContent === "serviceAnalysis" ||
+                            message.richContent === "qualitySummary" ? null : (
+                            message.text
+                          )}
+                          {/* A finished report lives inside Olivia's own reply
+                              bubble (Figma node 2189:13896) — a preview card,
+                              not a separate panel view. */}
+                          {message.richContent === "report" && (
+                            <ReportPreviewCard topic={message.topic ?? null} features={message.reportFeatures ?? []} />
+                          )}
+                          {/* Stopping a presentation still leaves the
+                              download action reachable — same button
+                              PresenterView's own footer had. */}
+                          {message.richContent === "presentationStopped" && (
+                            <button
+                              type="button"
+                              className={[reportCardStyles.downloadButton, styles.presentationStoppedDownload].join(" ")}
+                              onClick={() => window.print()}
+                            >
+                              Download Presentation Report
+                            </button>
+                          )}
+                          {/* Same placement as the report/presentation-stopped
+                              cards above — the dashboard preview lives inside
+                              Olivia's own reply bubble, not a separate panel view. */}
+                          {message.richContent === "liveDashboard" && (
+                            <LiveDashboardPreviewCard onViewFullScreen={() => onViewLiveDashboardFullScreen?.()} />
+                          )}
+                          {/* Same placement again — the summary itself lives
+                              inside Olivia's own reply bubble. Copy/reset/
+                              rate live outside the bubble now (see
+                              ChatTurnActions below), so this card only owns
+                              its own two actions (Download, Add current
+                              view). */}
+                          {message.richContent === "pageSummary" && (
+                            <PageSummaryChatCard
+                              summaryPageIds={message.summaryPageIds ?? []}
+                              currentSummaryPageId={currentSummaryPageId}
+                              onAddCurrentView={() => onAddCurrentViewToSummary?.()}
+                            />
+                          )}
+                          {/* The Quality summary and a single service's own
+                              analysis are two tabs of the same reply now
+                              (SummaryPager, Figma node 2209:42714 for the
+                              service side) — both richContent kinds render
+                              it, just starting on a different tab. */}
+                          {(message.richContent === "qualitySummary" || message.richContent === "serviceAnalysis") && (
+                            <SummaryPager
+                              initialPage={message.richContent === "qualitySummary" ? "quality" : "service"}
+                              serviceAnalysis={message.serviceAnalysis ?? lastServiceAnalysis ?? null}
+                            />
+                          )}
+                        </div>
+                      </div>
 
                       {/* The one action row every Olivia reply gets — Figma
                           node 2212:43095 — copy + reset (with their own
@@ -348,6 +380,8 @@ export function AskView({
                             const text =
                               message.richContent === "pageSummary"
                                 ? summaryAsText(message.summaryPageIds ?? [])
+                                : message.richContent === "serviceAnalysis" && message.serviceAnalysis
+                                ? serviceAnalysisAsText(message.serviceAnalysis)
                                 : message.text;
                             if (typeof navigator !== "undefined" && navigator.clipboard) {
                               navigator.clipboard.writeText(text).catch(() => {});
@@ -384,11 +418,15 @@ export function AskView({
                 scrollable log itself (not pinned above the composer) so it
                 scrolls away with the rest of the conversation instead of
                 staying stuck at the bottom — shows after any finished
-                Olivia reply on every screen, not just specific reply kinds. */}
+                Olivia reply on every screen, not just specific reply kinds.
+                Same three rows, same copy, same order, and same per-item
+                colors as the zero state's own "View page level insights"
+                list (see HomeGreeting) — not the uniform-purple .promptPill
+                these used to be. */}
             {showSuggestedFooter && (
               <div className={styles.suggestedFooter}>
                 <div className={outputStyles.pillList}>
-                  <button type="button" className={outputStyles.promptPill} onClick={() => onSummarizePage?.()}>
+                  <button type="button" className={outputStyles.promptPillSkyBlue} onClick={() => onSummarizePage?.()}>
                     <span className={outputStyles.promptPillIcon}>
                       <ListIcon />
                     </span>
@@ -396,23 +434,23 @@ export function AskView({
                   </button>
                   <button
                     type="button"
-                    className={outputStyles.promptPill}
-                    onClick={() => onOpenMode("presenter", currentTopic, "page")}
-                  >
-                    <span className={outputStyles.promptPillIcon}>
-                      <PlayCircleIcon />
-                    </span>
-                    Present this page
-                  </button>
-                  <button
-                    type="button"
-                    className={outputStyles.promptPill}
+                    className={outputStyles.promptPillRedOrange}
                     onClick={() => onOpenMode("dashboard", currentTopic, "page")}
                   >
                     <span className={outputStyles.promptPillIcon}>
                       <FinancialsIcon />
                     </span>
-                    Generate a live dashboard of page
+                    Live dashboard of page view
+                  </button>
+                  <button
+                    type="button"
+                    className={outputStyles.promptPillPinkle}
+                    onClick={() => onOpenMode("presenter", currentTopic, "page")}
+                  >
+                    <span className={outputStyles.promptPillIcon}>
+                      <VolumeIcon />
+                    </span>
+                    Present this page
                   </button>
                 </div>
               </div>

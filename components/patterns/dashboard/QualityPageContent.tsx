@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { RosterPerson } from "../../../lib/csv";
 import {
   BriefcaseIcon,
@@ -14,6 +15,8 @@ import {
 import styles from "./QualityPageContent.module.css";
 import { PrototypeSwitcher } from "./olivia/PrototypeSwitcher";
 import type { OliviaVariant } from "./olivia/OliviaPanel";
+import type { ServiceAnalysis } from "./olivia/oliviaContent";
+import { ServiceHistoryModal, buildClickedServiceAnalysis } from "./ServiceHistoryModal";
 
 export type QualityPageContentProps = {
   /** A handful of real roster people to attribute Recent Activity cards
@@ -21,17 +24,33 @@ export type QualityPageContentProps = {
   people: RosterPerson[];
   variant?: OliviaVariant;
   onVariantChange?: (v: OliviaVariant) => void;
+  /** ServiceHistoryModal's own Olivia FAB — whichever entry point this
+   * page's active Olivia variant already uses; see OliviaDashboard's
+   * openOliviaFromOverlay for what gets passed in. Optional only so
+   * this component doesn't hard-require a caller that hasn't wired
+   * Olivia at all. */
+  onOpenOlivia?: () => void;
+  /** Clicking a service in ServiceHistoryModal's own timeline/filmstrip
+   * — see OliviaDashboard's analyzeServiceFromOverlay for what gets
+   * passed in. Optional for the same reason onOpenOlivia is. */
+  onAnalyzeService?: (analysis: ServiceAnalysis) => void;
+  /** Passed straight through to ServiceHistoryModal — see its own doc
+   * comment and OliviaDashboard's oliviaDocksBeside for what each
+   * means. Both default to `false` so an unwired caller gets the
+   * modal's original full-screen, FAB-visible behavior. */
+  isOliviaSidePanelOpen?: boolean;
+  oliviaDocksBeside?: boolean;
 };
 
-type ActivityType = "Spot Clean" | "Periodic" | "Full Service";
+export type ActivityType = "Spot Clean" | "Periodic" | "Full Service";
 
-const ACTIVITY_ICON: Record<ActivityType, React.ReactNode> = {
+export const ACTIVITY_ICON: Record<ActivityType, React.ReactNode> = {
   "Spot Clean": <SprayCanIcon />,
   Periodic: <BriefcaseIcon />,
   "Full Service": <HandSparklesIcon />,
 };
 
-type ActivityCard = {
+export type ActivityCard = {
   type: ActivityType;
   minutesAgo: number;
   areaCategory: string;
@@ -49,7 +68,8 @@ const ACTIVITY: ActivityCard[] = [
 ];
 
 /**
- * The "Quality" nav link's destination (app/quality/page.tsx) — "Scope
+ * The "Quality" nav link's destination (app/(main)/quality, rendered by
+ * OliviaDashboard from app/(main)/layout.tsx) — "Scope
  * of Work." Built from a provided screenshot rather than a Figma node:
  * the dark theme (this project's default, see CLAUDE.md) rather than
  * the screenshot's light variant, and a CSS gradient in place of the
@@ -61,7 +81,22 @@ const ACTIVITY: ActivityCard[] = [
  * rather than inventing new ones — real 4insite site photography,
  * just not one-per-card.
  */
-export function QualityPageContent({ people, variant, onVariantChange }: QualityPageContentProps) {
+export function QualityPageContent({
+  people,
+  variant,
+  onVariantChange,
+  onOpenOlivia,
+  onAnalyzeService,
+  isOliviaSidePanelOpen = false,
+  oliviaDocksBeside = false,
+}: QualityPageContentProps) {
+  // Which Recent Activity card's photo opened ServiceHistoryModal, if
+  // any — the card itself plus who logged it (the same person already
+  // attributed on its own card, see the `person` lookup in the .map
+  // below) is everything ServiceHistoryModal needs to build a full
+  // history around it.
+  const [openHistory, setOpenHistory] = useState<{ card: ActivityCard; person: RosterPerson } | null>(null);
+
   return (
     <section className={styles.section}>
       <div className={styles.hero}>
@@ -130,7 +165,27 @@ export function QualityPageContent({ people, variant, onVariantChange }: Quality
                 </div>
                 <span className={styles.activityRating}>{card.rating}</span>
               </div>
-              <img src={card.photo} alt="" className={styles.activityPhoto} />
+              {person ? (
+                <button
+                  type="button"
+                  className={styles.activityPhotoButton}
+                  onClick={() => {
+                    setOpenHistory({ card, person });
+                    // Olivia switches to this service's own summary the
+                    // moment the photo is clicked — not only once the
+                    // history modal is open and a timeline/filmstrip row
+                    // is clicked inside it (see ServiceHistoryModal's own
+                    // selectAndAnalyze, which still re-fires this for
+                    // whichever entry the user browses to next).
+                    onAnalyzeService?.(buildClickedServiceAnalysis(card, person));
+                  }}
+                  aria-label={`View service history for ${card.areaName}`}
+                >
+                  <img src={card.photo} alt="" className={styles.activityPhoto} />
+                </button>
+              ) : (
+                <img src={card.photo} alt="" className={styles.activityPhoto} />
+              )}
             </div>
           );
         })}
@@ -142,6 +197,19 @@ export function QualityPageContent({ people, variant, onVariantChange }: Quality
         Area Types and captured <span className={styles.statsAccent}>423h 9m (85%)</span> of 496h 55m paid hours
         while supporting <span className={styles.statsAccent}>524 flights</span>.
       </p>
+
+      {openHistory && (
+        <ServiceHistoryModal
+          card={openHistory.card}
+          clickedPerson={openHistory.person}
+          people={people}
+          onClose={() => setOpenHistory(null)}
+          onOpenOlivia={() => onOpenOlivia?.()}
+          onAnalyzeService={(analysis) => onAnalyzeService?.(analysis)}
+          isOliviaSidePanelOpen={isOliviaSidePanelOpen}
+          oliviaDocksBeside={oliviaDocksBeside}
+        />
+      )}
     </section>
   );
 }
