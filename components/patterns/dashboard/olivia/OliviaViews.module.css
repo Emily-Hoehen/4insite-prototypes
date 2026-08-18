@@ -231,7 +231,11 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  /* Space between one turn's own ChatTurnActions row (Reset
+     Conversation/Rate this response) and the next turn's own Olivia/
+     user header — applies between every direct child of .log, so it's
+     the same 32px between every pair of chats, not just some. */
+  gap: 32px;
   padding: 24px 16px;
 }
 
@@ -267,11 +271,13 @@
 
 /* Olivia's turn carries more than the user's — a name/avatar row +
    bubble (10px gap, see .oliviaTurnBody), then ChatTurnActions' own
-   Reset/Rate row below it, 12px under the bubble per Figma node
-   2255:46107. */
+   Reset/Rate row below it, tightened to 8px under the bubble (Figma
+   node 2255:46107 itself specs 12px — kept slightly tighter than that
+   per request, now that .log's own 32px already separates this turn
+   from the next one). */
 .bubbleRowOlivia {
   align-items: flex-start;
-  gap: 12px;
+  gap: 8px;
 }
 
 /* Who-said-it row above each message — Figma nodes 2054:120 (user:
@@ -448,12 +454,14 @@
    inline in the log (a topic answer's own follow-up pills, and
    presentationStopped's own 2-pill row) — one consistent row, in one
    place, after every Olivia reply instead of three narrower variants.
-   The extra margin-top (on top of .log's own 12px gap, for 24px total)
+   The extra margin-top (on top of .log's own 32px gap, for 48px total)
    reads it as a separate "here's what you can do next" group rather
-   than just another turn in the conversation. */
+   than just another turn in the conversation — more breathing room
+   than the reset/rate row right above it gets from its own bubble
+   (see .bubbleRowOlivia's 8px). */
 .suggestedFooter {
   width: 100%;
-  margin-top: 12px;
+  margin-top: 16px;
 }
 
 .composer {
