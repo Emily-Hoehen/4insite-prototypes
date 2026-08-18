@@ -321,13 +321,38 @@ export function useOliviaSession(
     setView(mode);
   };
 
-  /** ExternalPresenterView's own close/Escape — foreground-only, same
-   * reasoning as closeReportModal. Returns to whatever the panel was
-   * showing before the site presentation opened (the "ask" view is
-   * never left in the first place — see pickMode/openMode's early
-   * return above), so this alone is what makes closing it land back
-   * on "the page they were on, with Olivia open." */
+  /** The whole panel/modal closing around a live site presentation
+   * (OliviaPanel/OliviaFabModal's own handleClose) — foreground-only,
+   * same reasoning as closeReportModal: silently drops it without
+   * leaving anything in the chat, since the panel itself is going away
+   * in the same click. Returns to whatever the panel was showing
+   * before the site presentation opened (the "ask" view is never left
+   * in the first place — see pickMode/openMode's early return above),
+   * so this alone is what makes closing it land back on "the page they
+   * were on, with Olivia open." Use stopSitePresentation instead for
+   * the presentation's OWN close button/Escape — the user explicitly
+   * ending it, which does leave a stop reply behind. */
   const closeExternalPresenter = () => setIsExternalPresenterOpen(false);
+
+  /** ExternalPresenterView's own "Close presentation" button/Escape —
+   * the site-wide equivalent of stopPresentation just below: ends the
+   * presentation and leaves the same kind of retroactive echo + stop
+   * reply in the chat (richContent: "presentationStopped", the same
+   * "Download Presentation Report" action), just worded for the whole
+   * site rather than one page. */
+  const stopSitePresentation = () => {
+    setIsExternalPresenterOpen(false);
+    setMessages((prev) => [
+      ...prev,
+      { id: nextMessageId(), role: "user", text: "Site Presentation" },
+      {
+        id: nextMessageId(),
+        role: "olivia",
+        text: "I stopped presenting your site. Download a report of your presentation below.",
+        richContent: "presentationStopped",
+      },
+    ]);
+  };
 
   /** The in-chat PresenterView's own "Stop" — distinct from pause,
    * which just holds the current slide without leaving the view. Ends
@@ -653,6 +678,7 @@ export function useOliviaSession(
     isReportModalOpen,
     isExternalPresenterOpen,
     closeExternalPresenter,
+    stopSitePresentation,
     isLiveDashboardFullScreenOpen,
     openLiveDashboardFullScreen,
     closeLiveDashboardFullScreen,

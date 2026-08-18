@@ -150,6 +150,27 @@ export function OliviaFabModal({
 
   const { view, setView, entryContext, topic, setTopic, isThinking, messages, scope, setScope } = session;
 
+  /** Same fix as OliviaPanel's own identical effect — without this,
+   * the report toast (below) only hides itself WHILE the user is on
+   * the Ask tab, chat flow, report ready; it doesn't know they've
+   * already seen the finished report sitting right there in the log,
+   * so switching to Presenter (or anywhere else) right after would
+   * make it pop back up as if something new had happened. This marks
+   * it dismissed for real the moment that's true, so it stays gone
+   * regardless of which view comes next. */
+  useEffect(() => {
+    if (
+      reportFlowVariant === "chat" &&
+      isOpen &&
+      view === "ask" &&
+      session.reportStatus === "ready" &&
+      !session.isReportToastDismissed
+    ) {
+      session.dismissReportToast();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reportFlowVariant, isOpen, view, session.reportStatus, session.isReportToastDismissed]);
+
   return (
     <>
     <div
@@ -284,7 +305,7 @@ export function OliviaFabModal({
       )}
 
       {session.isExternalPresenterOpen && (
-        <ExternalPresenterView topic={topic} onClose={session.closeExternalPresenter} />
+        <ExternalPresenterView topic={topic} onClose={session.stopSitePresentation} />
       )}
 
       {session.isLiveDashboardFullScreenOpen && (
@@ -293,9 +314,12 @@ export function OliviaFabModal({
 
       {/* Sibling of .modal, not a child — same reasoning as OliviaPanel's
           own toast: this has to outlive .modal's own open/close transform.
-          Hidden only while the user is already on the Ask tab with the
-          modal open AND the report lands there ("chat" flow) — "external"
-          never puts anything in the chat, so its toast always shows. */}
+          Hidden while the user is already on the Ask tab with the modal
+          open AND the report lands there ("chat" flow) — "external" never
+          puts anything in the chat, so its toast always shows. The effect
+          above additionally marks it dismissed for good the moment
+          that's true, so leaving the Ask tab right after doesn't make it
+          reappear for a report they've already seen. */}
       {session.reportStatus !== "idle" &&
         !session.isReportToastDismissed &&
         !(reportFlowVariant === "chat" && isOpen && view === "ask") && (

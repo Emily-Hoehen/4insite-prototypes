@@ -17,9 +17,8 @@ import { ChatTurnActions } from "./ChatTurnActions";
 import { HomeGreeting } from "./HomeGreeting";
 import { LiveDashboardPreviewCard } from "./LiveDashboardChatCard";
 import { OliviaAvatar } from "./OliviaAvatar";
-import { PageSummaryChatCard, summaryAsText } from "./PageSummaryChatCard";
+import { PageSummaryChatCard } from "./PageSummaryChatCard";
 import { ReportPreviewCard } from "./ReportChatCard";
-import { serviceAnalysisAsText } from "./ServiceAnalysisChatCard";
 import { SummaryPager } from "./SummaryPager";
 import styles from "./OliviaViews.module.css";
 import outputStyles from "./OutputsAndPerformanceLists.module.css";
@@ -190,8 +189,18 @@ export function AskView({
       // (name/avatar row, then the bubble) rather than the bottom of
       // the whole log — the old scrollTo(scrollHeight) below would
       // land on the tail end of a long reply (or its follow-up pills)
-      // instead of where it actually starts.
-      lastMessageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      // instead of where it actually starts. Computed by hand and
+      // applied straight to the log's own scrollTop rather than
+      // target.scrollIntoView(), which walks up through EVERY
+      // scrollable ancestor to bring the element into view — including
+      // the main page behind the panel, dragging it down along with
+      // the chat instead of leaving it alone.
+      const container = scrollRef.current;
+      const target = lastMessageRef.current;
+      if (container && target) {
+        const delta = target.getBoundingClientRect().top - container.getBoundingClientRect().top;
+        container.scrollTo({ top: container.scrollTop + delta, behavior: "smooth" });
+      }
       return;
     }
     // The user's own just-sent message, and the thinking indicator
@@ -363,32 +372,18 @@ export function AskView({
                       </div>
 
                       {/* The one action row every Olivia reply gets — Figma
-                          node 2212:43095 — copy + reset (with their own
-                          tooltips) left-aligned, rate this response
-                          right-aligned. Every reply, not just the last, same
-                          as the old standalone reset icon this replaced;
-                          the one exception is a report still mid-generation,
-                          which has nothing to copy or rate yet. This used to
-                          differ by reply kind (bare reset for a plain reply,
-                          reset+rate with no copy for report/
-                          presentationStopped/liveDashboard, copy+sync+rate
-                          folded inside the bubble for pageSummary) — now
-                          every kind gets this same row, once. */}
+                          node 2255:46107 — "Reset Conversation" left-aligned,
+                          rate this response right-aligned. Every reply, not
+                          just the last, same as the old standalone reset icon
+                          this replaced; the one exception is a report still
+                          mid-generation, which has nothing to rate yet. This
+                          used to differ by reply kind (bare reset for a plain
+                          reply, reset+rate for report/presentationStopped/
+                          liveDashboard, copy+sync+rate folded inside the
+                          bubble for pageSummary) — now every kind gets this
+                          same row, once. */}
                       {message.richContent !== "reportGenerating" && (
-                        <ChatTurnActions
-                          onCopy={() => {
-                            const text =
-                              message.richContent === "pageSummary"
-                                ? summaryAsText(message.summaryPageIds ?? [])
-                                : message.richContent === "serviceAnalysis" && message.serviceAnalysis
-                                ? serviceAnalysisAsText(message.serviceAnalysis)
-                                : message.text;
-                            if (typeof navigator !== "undefined" && navigator.clipboard) {
-                              navigator.clipboard.writeText(text).catch(() => {});
-                            }
-                          }}
-                          onReset={() => onResetConversation()}
-                        />
+                        <ChatTurnActions onReset={() => onResetConversation()} />
                       )}
 
                     </>
