@@ -278,7 +278,8 @@ export function AskView({
             )}
           </div>
         ) : (
-          <div className={[styles.log, styles.logMessages].join(" ")} ref={scrollRef} aria-live="polite">
+          <div className={styles.log} ref={scrollRef} aria-live="polite">
+            <div className={styles.logMessages}>
             {messages.map((message) => {
               const isLast = message === lastMessage;
               const isUser = message.role === "user";
@@ -408,11 +409,14 @@ export function AskView({
                 </div>
               </div>
             )}
+            </div>
 
-            {/* Suggested-prompts row — Figma node 2209:40293. Part of the
-                scrollable log itself (not pinned above the composer) so it
-                scrolls away with the rest of the conversation instead of
-                staying stuck at the bottom — shows after any finished
+            {/* Suggested-prompts row — Figma node 2209:40293. A sibling of
+                .logMessages within .log (not nested inside it) so it can be
+                bottom-pinned on its own — see .suggestedFooter's own comment
+                in OliviaViews.module.css. Scrolls away with the rest of the
+                conversation instead of staying stuck at the bottom once
+                there's more content than fits — shows after any finished
                 Olivia reply on every screen, not just specific reply kinds.
                 Same three rows, same copy, same order, and same per-item
                 colors as the zero state's own "View page level insights"

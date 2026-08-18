@@ -225,24 +225,36 @@
   overflow: hidden;
 }
 
+/* The scroll container. Once a conversation exists it holds two direct
+   children: .logMessages (the turns themselves, top-anchored, sized to
+   their own content) and .suggestedFooter (bottom-pinned — see its own
+   comment below). gap here is the FLOOR of the space between those two
+   — .suggestedFooter's own margin-top:auto adds whatever's left on top
+   of it, so a short conversation still gets this same minimum even
+   though most of the extra space collects there instead of below the
+   footer. On the zero-state branch .log has only one child (the
+   greeting), so the gap never applies. */
 .log {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  /* Space between one turn's own ChatTurnActions row (Reset
-     Conversation/Rate this response) and the next turn's own Olivia/
-     user header — applies between every direct child of .log, so it's
-     the same 32px between every pair of chats, not just some. */
   gap: 32px;
   padding: 24px 16px;
 }
 
-/* A conversation starts at the top of the card and grows downward
-   (Figma node 2054:118) — not bottom-anchored. */
+/* The turns themselves — one entry per message (bubbleRow) plus the
+   thinking indicator, own 32px gap between each pair (the same value
+   .log used to apply directly before .suggestedFooter moved out to be
+   its own sibling — see that class's comment). A conversation starts
+   at the top of the card and grows downward (Figma node 2054:118), so
+   this group takes only its natural content height rather than
+   stretching — the leftover room in .log collects below it instead. */
 .logMessages {
-  justify-content: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
 }
 
 /* The composer's own footer strip within the card, below the
@@ -443,10 +455,11 @@
   }
 }
 
-/* Suggested-prompts row — Figma node 2209:40293. An ordinary child of
-   .log (not a fixed footer above .chatCardFooter's composer) — it
+/* Suggested-prompts row — Figma node 2209:40293. A sibling of
+   .logMessages within .log (not nested inside it, and not a fixed
+   footer pinned above .chatCardFooter's composer either) — it still
    scrolls away with the rest of the conversation rather than staying
-   pinned once there's more content than fits. Reuses
+   stuck once there's more content than fits. Reuses
    OutputsAndPerformanceLists.module.css's .pillList/.promptPill
    (imported as outputStyles in AskView) rather than its own copy —
    same ghost-purple pill look used everywhere else in this file tree.
@@ -454,14 +467,32 @@
    inline in the log (a topic answer's own follow-up pills, and
    presentationStopped's own 2-pill row) — one consistent row, in one
    place, after every Olivia reply instead of three narrower variants.
-   The extra margin-top (on top of .log's own 32px gap, for 48px total)
-   reads it as a separate "here's what you can do next" group rather
-   than just another turn in the conversation — more breathing room
-   than the reset/rate row right above it gets from its own bubble
-   (see .bubbleRowOlivia's 8px). */
+
+   margin-top: auto is the flexbox trick for bottom-pinning a child
+   inside a column flex container: it consumes whatever room is left
+   over in .log beyond .logMessages' own content height, so a short
+   exchange (one question, one reply) ends with this row sitting flush
+   just above the composer instead of leaving a gap of dead space below
+   it. .log's own 32px gap is still the floor — once the conversation
+   is tall enough to fill or overflow the panel, there's no free space
+   left for the auto margin to claim, so this settles back to that same
+   32px, same as the space between any other two turns.
+
+   margin-bottom: -24px cancels out .log's own 24px padding-bottom
+   (the reserved chin auto-margin still respects as free space,
+   pushing this row down but leaving that padding empty beneath it) —
+   without it, the pills would sit 24px above that padding PLUS
+   .chatCardFooter's own 20px padding-top above the composer, 44px
+   total. Per the user's request the gap above the composer should
+   read as 20px, i.e. exactly .chatCardFooter's own padding-top and
+   nothing from .log's — so this row alone reaches into that reserved
+   chin rather than .log's padding-bottom changing for every other
+   case that relies on it (the zero state's centering, and any reply
+   that ends without a footer). */
 .suggestedFooter {
   width: 100%;
-  margin-top: 16px;
+  margin-top: auto;
+  margin-bottom: -24px;
 }
 
 .composer {
