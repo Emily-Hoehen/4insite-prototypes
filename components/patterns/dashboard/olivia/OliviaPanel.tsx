@@ -236,6 +236,28 @@ export function OliviaPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPresenterMinimized]);
 
+  /** The report toast (below) only hides itself WHILE the user is on
+   * the Ask tab, chat flow, report ready — it doesn't otherwise know
+   * they've already seen the finished report sitting right there in
+   * the log. Without this, switching to Presenter (or anywhere else)
+   * right after would make it pop back up as if something new had
+   * happened. Once that "already seen it" moment occurs, this marks
+   * the toast dismissed for real (same flag the toast's own X uses)
+   * so it stays gone regardless of which view comes next — same
+   * reasoning either way: nothing new to tell them. */
+  useEffect(() => {
+    if (
+      reportFlowVariant === "chat" &&
+      isOpen &&
+      view === "ask" &&
+      session.reportStatus === "ready" &&
+      !session.isReportToastDismissed
+    ) {
+      session.dismissReportToast();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reportFlowVariant, isOpen, view, session.reportStatus, session.isReportToastDismissed]);
+
   /** Closing the panel also drops the "external" flow's floating
    * checklist dialog if it's open — that step is foreground-only
    * (nothing's been requested yet), unlike generation itself, which
@@ -459,7 +481,7 @@ export function OliviaPanel({
       )}
 
       {session.isExternalPresenterOpen && (
-        <ExternalPresenterView topic={topic} onClose={session.closeExternalPresenter} />
+        <ExternalPresenterView topic={topic} onClose={session.stopSitePresentation} />
       )}
 
       {session.isLiveDashboardFullScreenOpen && (
@@ -489,10 +511,13 @@ export function OliviaPanel({
         />
       )}
 
-      {/* Hidden only while the user is already on the Ask tab with the
-          panel open AND the report lands there ("chat" flow) — the
-          "external" flow never puts anything in the chat, so its toast
-          always shows regardless of what's open. See useOliviaSession. */}
+      {/* Hidden while the user is already on the Ask tab with the panel
+          open AND the report lands there ("chat" flow) — the "external"
+          flow never puts anything in the chat, so its toast always
+          shows regardless of what's open. The effect above additionally
+          marks it dismissed for good the moment that's true, so leaving
+          the Ask tab right after (Presenter, etc.) doesn't make it
+          reappear for a report they've already seen. See useOliviaSession. */}
       {session.reportStatus !== "idle" &&
         !session.isReportToastDismissed &&
         !(reportFlowVariant === "chat" && isOpen && view === "ask") && (

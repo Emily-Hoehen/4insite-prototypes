@@ -266,12 +266,12 @@
 }
 
 /* Olivia's turn carries more than the user's — a name/avatar row +
-   bubble (10px gap, see .oliviaTurnBody), then the follow-up pills
-   below it — so the row itself needs the wider 16px gap between
-   those two groups (Figma node 2054:125). */
+   bubble (10px gap, see .oliviaTurnBody), then ChatTurnActions' own
+   Reset/Rate row below it, 12px under the bubble per Figma node
+   2255:46107. */
 .bubbleRowOlivia {
   align-items: flex-start;
-  gap: 16px;
+  gap: 12px;
 }
 
 /* Who-said-it row above each message — Figma nodes 2054:120 (user:
