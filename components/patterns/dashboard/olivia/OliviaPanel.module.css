@@ -1,0 +1,371 @@
+/* ============================================================
+   OliviaPanel — consolidated AI assistant panel. One entry point
+   (the navbar's Olivia avatar) replacing the four disconnected
+   touchpoints described in the consolidation brief: side panel,
+   presentation mode, offline report, and the dashboard drawer.
+
+   --olivia-panel-gradient (the panel's own diagonal background) and
+   the exact neutral/text colors below are pulled directly from
+   Figma node 2038:101 (file I7TFV5MGgQwMlRjKlwJlBT, "Side Panel
+   Option 1") via get_design_context — not extrapolated. --olivia-
+   gradient (used for button fills — active mode icon, send/primary
+   buttons) is a separate, still-hand-tuned linear version of the
+   same purple family for flat surfaces the design doesn't specify
+   a fill for directly.
+   ============================================================ */
+
+/* Pushes the page rather than overlaying it: a real flex sibling of
+   OliviaDashboard's page column (see .appShell/.pageColumn there),
+   not a `position: fixed` layer floating over everything. This outer
+   slot is what actually animates — width 0 -> 420px, clipped via
+   overflow: hidden — while .panel itself (below) stays a fixed 420px
+   so its own content never squishes mid-transition; growing the slot
+   just reveals more of it. `position: sticky` keeps it pinned to the
+   viewport as the (possibly much taller) page scrolls beside/beneath
+   it, the same "always reachable" behavior the old `position: fixed`
+   gave for free. No backdrop any more — the page stays fully visible
+   and interactive next to the panel, so there's nothing to dim or
+   click through to dismiss; closing is explicit (X / Escape) only. */
+.panelSlot {
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  flex-shrink: 0;
+  width: 0;
+  min-width: 0;
+  height: 100vh;
+  overflow: hidden;
+  transition: width 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.panelSlotOpen {
+  width: min(420px, 100vw);
+}
+
+.panel {
+  --olivia-gradient: linear-gradient(135deg, #af99ff 0%, #734cff 55%, #5940b3 100%);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, 100vw);
+  height: 100%;
+  overflow: hidden;
+  /* Panel background image, public/olivia/gradient2.png — replaces the
+     flat CSS gradient this was before. */
+  background-image: url("/olivia/gradient2.png");
+  background-size: cover;
+  background-position: top center;
+  background-color: #5940b3;
+  border-left: 1px solid rgba(223, 227, 230, 0.1);
+  box-shadow: -8px 0 32px rgba(24, 30, 36, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panelSlot {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* ---------------- Header ----------------
+   Everything lives in one row now: identity (doubles as a "back to
+   Ask" button), the three site-specific modes, and close. Per the
+   Figma reference (node 2022:1559) these sit together at the top
+   rather than the identity/tabs being stacked in two rows — it's
+   both more compact and matches the source design directly. */
+
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 16px;
+  flex-shrink: 0;
+}
+
+.identity {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 4px;
+  margin: -4px;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.identity:hover {
+  background-color: rgba(223, 227, 230, 0.06);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--type-h2-family);
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--color-text-dt-default);
+}
+
+.subtitle {
+  margin: 0;
+  font-family: var(--type-body-sm-family);
+  font-size: 12px;
+  font-weight: 400;
+  color: #ffffff;
+  line-height: 1;
+}
+
+/* Same hover-tooltip treatment as .modeTooltip below — "panelIcons"
+   only, where clicking the name resets the conversation instead of
+   just returning to Ask, so it needs the same discoverability an
+   icon-only control would. */
+.identityTooltip {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 4px;
+  z-index: 6;
+  width: max-content;
+  max-width: 160px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background-color: var(--color-neutral-900);
+  border: 1px solid rgba(223, 227, 230, 0.1);
+  box-shadow: 0 8px 20px rgba(24, 30, 36, 0.4);
+  color: var(--color-text-dt-default);
+  font-family: var(--type-h4-family);
+  font-size: 12px;
+  font-weight: var(--type-h4-weight);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.identity:hover .identityTooltip,
+.identity:focus-visible .identityTooltip {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 300ms;
+}
+
+.resetButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 4px;
+  flex-shrink: 0;
+  background: none;
+  color: var(--color-text-dt-default);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.resetButton i {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.resetButton:hover {
+  background-color: var(--color-neutral-700);
+}
+
+.resetTooltip {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 6;
+  width: max-content;
+  max-width: 160px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background-color: var(--color-neutral-900);
+  border: 1px solid rgba(223, 227, 230, 0.1);
+  box-shadow: 0 8px 20px rgba(24, 30, 36, 0.4);
+  color: var(--color-text-dt-default);
+  font-family: var(--type-h4-family);
+  font-size: 12px;
+  font-weight: var(--type-h4-weight);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.resetButton:hover .resetTooltip,
+.resetButton:focus-visible .resetTooltip {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 300ms;
+}
+
+.closeButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 4px;
+  flex-shrink: 0;
+  background: none;
+  color: var(--color-text-dt-default);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.closeButton i {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.closeButton:hover {
+  background-color: var(--color-neutral-700);
+  color: var(--color-text-dt-default);
+}
+
+/* ---------------- Mode group (Presenter / Report / Dashboard) ----------------
+   Icon-only, in the header itself rather than a separate tab row
+   below it — matches the Figma reference and keeps the panel's top
+   chrome to one compact line. Each button opens a small menu (see
+   ModeMenuButton) instead of switching views directly, since the
+   scope choice belongs at the point of picking the mode. */
+
+.modeGroup {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-shrink: 0;
+}
+
+.modeButtonWrap {
+  position: relative;
+}
+
+.modeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--color-text-dt-default);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 200ms ease;
+}
+
+.modeButton i {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.modeButton:hover {
+  color: var(--color-text-dt-default);
+  background-color: rgba(223, 227, 230, 0.08);
+}
+
+/* Custom hover tooltip — the icons have no visible label otherwise.
+   Carries both the name AND what it does (not just a re-stated
+   label), since that's the actual gap: knowing it's called "Reports"
+   doesn't tell you it downloads a file. Opens downward, same side as
+   the menu (never shows at the same time, so there's no collision) —
+   the header sits at the very top of the viewport, so opening
+   upward would clip off the top edge of the screen. */
+.modeTooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  z-index: 6;
+  transform: translate(-50%, -4px);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: max-content;
+  max-width: 160px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background-color: var(--color-neutral-900);
+  border: 1px solid rgba(223, 227, 230, 0.1);
+  box-shadow: 0 8px 20px rgba(24, 30, 36, 0.4);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.modeTooltipLabel {
+  color: var(--color-text-dt-default);
+  font-family: var(--type-h4-family);
+  font-size: 12px;
+  font-weight: var(--type-h4-weight);
+}
+
+.modeTooltip::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-bottom-color: var(--color-neutral-900);
+}
+
+.modeButtonWrap:hover .modeTooltip,
+.modeButton:focus-visible ~ .modeTooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  transition-delay: 300ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modeTooltip,
+  .identityTooltip,
+  .resetTooltip {
+    transition-duration: 0.01ms;
+  }
+}
+
+.headerDivider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--color-text-dt-grey);
+  flex-shrink: 0;
+}
+
+/* ---------------- Body ---------------- */
+
+.body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border-top: 1px solid rgba(223, 227, 230, 0.08);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-neutral-600) transparent;
+}
+
+.body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.body::-webkit-scrollbar-thumb {
+  background-color: var(--color-neutral-600);
+  border-radius: 8px;
+}
+
+.body::-webkit-scrollbar-track {
+  background: transparent;
+}

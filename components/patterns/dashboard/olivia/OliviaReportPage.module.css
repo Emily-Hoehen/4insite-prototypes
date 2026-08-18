@@ -1,0 +1,205 @@
+/* ============================================================
+   Standalone mobile report page — the "open in a new tab"
+   destination behind ReportView's "Open full report" action.
+   Mobile-first: a single centered column that reads exactly the
+   same whether it's actually opened on a phone or, as in the
+   reference, a desktop browser tab.
+   ============================================================ */
+
+.page {
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  background: radial-gradient(ellipse 900px 560px at 50% 0%, rgba(115, 76, 255, 0.16), transparent 70%),
+    var(--color-neutral-900);
+}
+
+.card {
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 480px) {
+  .page {
+    padding: 48px 16px;
+  }
+
+  .card {
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: var(--shadow-dt-popup-menu);
+  }
+}
+
+/* ---------------- Hero (Figma-referenced splash screen) ---------------- */
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  min-height: 100dvh;
+  padding: 56px 28px 40px;
+  background-image: url("/olivia/gradient2.png");
+  background-size: cover;
+  background-position: top center;
+  background-color: #5940b3;
+  color: var(--color-text-dt-default);
+}
+
+@media (min-width: 480px) {
+  .hero {
+    min-height: min(100dvh, 760px);
+  }
+}
+
+.heroTitle {
+  margin: 4px 0 0;
+  font-family: var(--type-h1-family);
+  font-size: clamp(1.5rem, 5vw, var(--type-h1-size));
+  font-weight: var(--type-h1-weight);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.heroBody {
+  margin: 0;
+  max-width: 320px;
+  font-family: var(--type-body-lg-family);
+  font-size: var(--type-body-lg-size);
+  line-height: var(--type-body-lg-leading);
+}
+
+.heroBody strong {
+  font-weight: var(--type-h4-weight);
+}
+
+.heroRange {
+  margin: -12px 0 0;
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  color: rgba(250, 251, 252, 0.72);
+}
+
+.infoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.infoLabel {
+  margin: 0;
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  color: rgba(250, 251, 252, 0.72);
+}
+
+.portfolioRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.portfolioLogo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.portfolioName {
+  margin: 0;
+  font-family: var(--type-h4-family);
+  font-size: var(--type-body-lg-size);
+  font-weight: var(--type-h4-weight);
+}
+
+.portfolioMeta {
+  margin: 0;
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  color: rgba(250, 251, 252, 0.72);
+}
+
+.sitePill {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 8px 16px;
+  border-radius: 100px;
+  border: 1px solid rgba(250, 251, 252, 0.3);
+  font-family: var(--type-h4-family);
+  font-size: 13px;
+  font-weight: var(--type-h4-weight);
+}
+
+.scrollCue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  align-self: center;
+  margin-top: auto;
+  padding: 12px 20px;
+  border: 1px solid rgba(250, 251, 252, 0.4);
+  border-radius: 100px;
+  background: none;
+  color: var(--color-text-dt-default);
+  font-family: var(--type-h4-family);
+  font-size: 12px;
+  font-weight: var(--type-h4-weight);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  animation: scroll-cue-bob 2.2s ease-in-out infinite;
+}
+
+.scrollCue:hover {
+  background-color: rgba(250, 251, 252, 0.1);
+}
+
+.scrollCue i,
+.scrollCue svg {
+  font-size: 11px;
+}
+
+@keyframes scroll-cue-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrollCue {
+    animation: none;
+  }
+}
+
+/* ---------------- Report section ---------------- */
+
+.reportSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 40px 28px 56px;
+  background-color: var(--color-neutral-800);
+}
+
+.reportEyebrow {
+  margin: 0;
+  font-family: var(--type-h4-family);
+  font-size: 12px;
+  font-weight: var(--type-h4-weight);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-datavis-purple-100);
+}

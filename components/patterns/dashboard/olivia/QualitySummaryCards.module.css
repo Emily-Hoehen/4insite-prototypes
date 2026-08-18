@@ -1,0 +1,389 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  flex: 1; /* allow the summary wrapper to grow inside the panel's log */
+  min-height: 0; /* allow children with overflow to clamp properly */
+}
+
+.summaryStack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1; /* fill remaining vertical space */
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.summaryIntro {
+  padding: 12px 16px 0 16px;
+}
+
+.summaryIntroText {
+  margin: 0 0 8px 0;
+  font-family: var(--type-h2-family);
+  font-size: 20px;
+  font-weight: var(--type-h2-weight);
+  color: var(--color-text-dt-default);
+}
+
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--color-neutral-850);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardHeadIcon {
+  font-size: 14px;
+  line-height: 1;
+  color: var(--color-text-dt-grey);
+}
+
+.cardHeadTitle {
+  margin: 0;
+  font-family: var(--type-h4-family);
+  font-size: 14px;
+  font-weight: var(--type-h4-weight);
+  color: var(--color-text-dt-grey);
+}
+
+.cardHeadline {
+  margin: 0;
+  font-family: var(--type-h2-family);
+  font-size: 18px;
+  font-weight: var(--type-h2-weight);
+  line-height: 1.3;
+  color: var(--color-text-dt-default);
+}
+
+.cardSub {
+  margin: 0;
+  font-family: var(--type-body-md-family);
+  font-size: 14px;
+  color: var(--color-text-dt-grey);
+}
+
+.cardBigStat {
+  margin: 0;
+  font-family: var(--type-h2-family);
+  font-size: 22px;
+  font-weight: var(--type-h2-weight);
+  color: var(--color-text-dt-default);
+}
+
+.accentGreen {
+  color: var(--color-success-300);
+}
+
+.accentPurple {
+  color: var(--color-datavis-purple-100);
+}
+
+.accentBlue {
+  color: var(--color-text-dt-blue);
+}
+
+.hr {
+  width: 100%;
+  height: 1px;
+  background-color: rgba(223, 227, 230, 0.15);
+}
+
+/* ---------------- Slide 1: departures + verification ---------------- */
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.progressStat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.progressStat:last-child {
+  align-items: flex-end;
+}
+
+.progressLabel {
+  font-family: var(--type-body-sm-family);
+  font-size: 12px;
+  color: var(--color-text-dt-grey);
+}
+
+.progressValue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--type-h2-family);
+  font-size: 18px;
+  font-weight: var(--type-h2-weight);
+  color: var(--color-text-dt-default);
+}
+
+.progressIconGreen {
+  font-size: 14px;
+  color: var(--color-success-300);
+}
+
+.progressIconGrey {
+  font-size: 14px;
+  color: var(--color-text-dt-grey);
+}
+
+.progressTrack {
+  width: 100%;
+  height: 8px;
+  border-radius: 100px;
+  background-color: var(--color-neutral-700);
+  overflow: hidden;
+}
+
+.progressFillGreen {
+  height: 100%;
+  border-radius: 100px;
+  background-color: var(--color-success-300);
+}
+
+.donutRow {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 100px;
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--type-body-md-family);
+  font-size: 13px;
+  color: var(--color-text-dt-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.legendCount {
+  font-family: var(--type-h4-family);
+  font-size: 13px;
+  font-weight: var(--type-h4-weight);
+  color: var(--color-text-dt-default);
+}
+
+/* ---------------- Slide 2: staffing + quality results ---------------- */
+
+.progressTrackAmber {
+  position: relative;
+  width: 100%;
+  height: 32px;
+  border-radius: 4px;
+  background-color: var(--color-neutral-700);
+  overflow: hidden;
+}
+
+.progressFillAmber {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 10px;
+  border-radius: 4px 0 0 4px;
+  background-color: var(--color-datavis-yellow-orange-500);
+  color: var(--color-text-dt-default-inverted);
+  font-family: var(--type-h4-family);
+  font-size: 12px;
+  font-weight: var(--type-h4-weight);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.scoreRow {
+  display: flex;
+  gap: 8px;
+}
+
+.scoreBox {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 6px;
+  background-color: rgba(0, 200, 137, 0.15);
+}
+
+.scoreBoxMuted {
+  background-color: var(--color-neutral-700);
+}
+
+.scoreValue {
+  font-family: var(--type-h1-family);
+  font-size: 20px;
+  font-weight: var(--type-h1-weight);
+  color: var(--color-success-300);
+}
+
+.scoreValueMuted {
+  font-family: var(--type-h1-family);
+  font-size: 20px;
+  font-weight: var(--type-h1-weight);
+  color: var(--color-text-dt-grey);
+}
+
+.scoreValuePurple {
+  font-family: var(--type-h1-family);
+  font-size: 18px;
+  font-weight: var(--type-h1-weight);
+  color: var(--color-datavis-purple-100);
+}
+
+.scoreLabel {
+  font-family: var(--type-body-sm-family);
+  font-size: 11px;
+  color: var(--color-text-dt-grey);
+}
+
+/* ---------------- Slide 3: stacked completion chart ---------------- */
+
+.stackedChart {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 120px;
+  padding-top: 8px;
+}
+
+.stackedTargetLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--color-datavis-yellow-orange-500);
+}
+
+.stackedCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.stackedBar {
+  display: flex;
+  flex-direction: column-reverse;
+  width: 100%;
+  max-width: 18px;
+  height: 100px;
+}
+
+.stackedBar span {
+  display: block;
+  width: 100%;
+}
+
+.stackedLabel {
+  font-family: var(--type-body-sm-family);
+  font-size: 9px;
+  color: var(--color-text-dt-grey);
+  white-space: nowrap;
+}
+
+/* ---------------- Controls ---------------- */
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: none;
+  border-radius: 100px;
+  background-color: var(--color-neutral-600);
+  cursor: pointer;
+}
+
+.dotActive {
+  width: 16px;
+  background-color: var(--color-datavis-purple-100);
+}
+
+/* ---------------- After the last card ---------------- */
+
+.afterSummary {
+  display: flex;
+  gap: 8px;
+}
+
+.afterSummaryPill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 4px;
+  background-color: rgba(175, 153, 255, 0.15);
+  color: var(--color-datavis-purple-100);
+  font-family: var(--type-body-md-family);
+  font-size: 13px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.afterSummaryPill:hover {
+  background-color: rgba(175, 153, 255, 0.25);
+}
+
+.afterSummaryIcon {
+  font-size: 13px;
+  line-height: 1;
+}

@@ -1,0 +1,138 @@
+/* ============================================================
+   DashboardHeader — Figma node 2006:981 ("Header")
+   ============================================================ */
+
+.header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  width: 1440px;
+  height: 209px;
+  overflow: visible;
+  background-color: var(--color-neutral-900);
+}
+
+.gradientPanel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 480px;
+  height: 100%;
+  padding: 32px;
+  overflow: hidden;
+  background-image: url("/dashboard/header-gradient-bg.png");
+  background-size: cover;
+  background-position: center;
+}
+
+.gradientPanel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(-39.32deg, #181e24 28.389%, rgba(24, 30, 36, 0.21) 98.734%);
+}
+
+.gradientContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 13px;
+}
+
+.logo {
+  flex-shrink: 0;
+  width: 58px;
+  height: 58px;
+  border-radius: 8px;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.logoImg {
+  width: 79.81%;
+  height: 63.61%;
+  object-fit: contain;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--color-text-dt-default);
+}
+
+.siteName {
+  font-family: var(--type-h1-family);
+  font-size: 32px;
+  font-weight: var(--type-h1-weight);
+  line-height: 1;
+  margin: 0;
+}
+
+.greeting {
+  font-family: var(--type-h3-family);
+  font-size: var(--type-h3-size);
+  font-weight: var(--type-h3-weight);
+  line-height: var(--type-h3-leading);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.photos {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  height: 224px;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.photoMain,
+.photo {
+  flex-shrink: 0;
+  width: 328px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.photoMain {
+  border-radius: 16px;
+}
+
+.photo {
+  border-radius: 8px;
+}
+
+.photoMain img,
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.skrim {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background-image: linear-gradient(
+    to top,
+    #181e24 0%,
+    rgba(24, 30, 36, 0.78) 50.81%,
+    rgba(24, 30, 36, 0) 100%
+  );
+  pointer-events: none;
+}
+
+.photosButton {
+  position: absolute;
+  bottom: 32px;
+  right: 32px;
+}

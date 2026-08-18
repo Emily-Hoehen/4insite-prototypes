@@ -1,0 +1,158 @@
+.wrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 100px;
+  /* Purple ghost-static tint — see the brand note atop OliviaViews.module.css. */
+  background-color: rgba(115, 76, 255, 0.15);
+  color: var(--color-datavis-purple-100);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 120ms ease, transform 120ms ease;
+}
+
+.trigger i {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.trigger:hover {
+  background-color: rgba(115, 76, 255, 0.3);
+  transform: scale(1.08);
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--color-datavis-purple-100);
+  outline-offset: 2px;
+}
+
+/* ---------------- Popover ----------------
+   Per Figma node 2082:398 ("Olivia Trigger Popover"): a mini version
+   of the panel's own gradient identity header sitting directly on
+   top of the question list, instead of a plain uppercase label. */
+
+.popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  width: 350px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(24, 30, 36, 0.75);
+}
+
+.popoverHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  padding: 12px 16px;
+  background: var(--olivia-gradient, linear-gradient(135deg, #af99ff 0%, #734cff 55%, #5940b3 100%));
+}
+
+.popoverHeaderTitle {
+  margin: 0;
+  font-family: var(--type-h3-family);
+  font-size: 16px;
+  font-weight: var(--type-h3-weight);
+  color: var(--color-text-lt-default-inverted);
+}
+
+.popoverHeaderSubtitle {
+  margin: 0;
+  font-family: var(--type-body-sm-family);
+  font-size: 12px;
+  font-weight: 400;
+  color: #ffffff;
+}
+
+.popoverBody {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px;
+  background-color: var(--color-neutral-800);
+  border-bottom: 1px solid rgba(223, 227, 230, 0.15);
+}
+
+.popoverHeading {
+  margin: 0;
+  font-family: var(--type-body-md-family);
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-dt-default);
+}
+
+.popoverQuestions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* Same purple-tint treatment as the chat's other suggested-prompt pills
+   (OutputsAndPerformanceLists.module.css's .promptPill, per Figma node
+   2080:328) — one consistent "this is a thing you can ask Olivia" look
+   everywhere. */
+.popoverQuestion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 40px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: rgba(175, 153, 255, 0.15);
+  color: var(--color-datavis-purple-100);
+  font-family: var(--type-h4-family);
+  font-size: 14px;
+  font-weight: var(--type-h4-weight);
+  line-height: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.popoverQuestion:hover {
+  background-color: rgba(175, 153, 255, 0.25);
+}
+
+.popoverOpen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  border: none;
+  border-radius: 4px;
+  background-color: rgba(74, 168, 255, 0.15);
+  color: var(--color-text-dt-blue);
+  font-family: var(--type-h4-family);
+  font-size: 14px;
+  font-weight: var(--type-h4-weight);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.popoverOpen:hover {
+  background-color: rgba(74, 168, 255, 0.25);
+}
+
+.popoverOpenIcon {
+  font-size: 14px;
+  line-height: 1;
+}

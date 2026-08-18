@@ -1,0 +1,986 @@
+/* ============================================================
+   Shared styles for the Olivia panel's four mode views (Ask,
+   Presenter, Report, Dashboard). Kept in one file since they share
+   the same visual language (chips, empty states, mini stat cards).
+
+   OLIVIA BRAND — content and controls that are hers (not the
+   site's own UI) use the Datavis/Purple family throughout this
+   file: --color-datavis-purple-100 (#af99ff) for text/icons on
+   dark surfaces, -500 (#734cff) for solid fills, matching her
+   avatar gradient in Nav.module.css and OliviaPanel.module.css.
+   This is deliberately distinct from the site's blue
+   (--color-primary-*), which stays reserved for the user's own
+   input (e.g. the chat bubble you send) — so purple always means
+   "this came from Olivia," wherever it shows up. Ghost/ pressed
+   tints below follow the same opacity formula as the existing
+   --btn-ghost-dt-primary-* tokens (15%/8%), just with the purple
+   hex, since DS2 doesn't define a purple ghost token to pull.
+   Solid fills use `var(--olivia-gradient)`, defined once on
+   `.panel` in OliviaPanel.module.css and inherited down through
+   this file's elements (custom properties cascade through the DOM,
+   not per-stylesheet) — so every one of Olivia's filled surfaces
+   pulls from the same gradient instead of flat purple.
+   ============================================================ */
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ================================================================
+   Greeting screens (HomeGreeting / TopicGreeting) — what AskView
+   shows before any conversation has started. Two distinct entry
+   points, two distinct greetings: the navbar's general avatar leads
+   with personalized "For you" picks; a card's contextual trigger
+   already knows the topic, so it leads with focused questions
+   about exactly that instead.
+   ================================================================ */
+
+.greeting {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.greetingHeadline {
+  margin: 0;
+  font-family: var(--type-h1-family);
+  font-size: 22px;
+  font-weight: var(--type-h1-weight);
+  line-height: 1.25;
+  color: var(--color-text-dt-default);
+}
+
+.greetingSub {
+  margin: 0 0 12px;
+  font-family: var(--type-body-md-family);
+  font-size: var(--type-body-md-size);
+  line-height: var(--type-body-md-leading);
+  color: var(--color-text-dt-grey);
+}
+
+/* ---------------- Home greeting (Figma node 2038:101) ----------------
+   Unlike TopicGreeting, this one centers vertically in the available
+   space rather than pinning to the top. Two nested groups, matching
+   the source exactly: [avatar + text] as one group (24px gap), that
+   group + the suggestion list as the outer group (48px gap). */
+
+.homeGreeting {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  text-align: center;
+}
+
+.homeGreetingHero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
+.homeGreetingText {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 280px;
+}
+
+.homeGreetingText .greetingHeadline {
+  text-align: center;
+}
+
+.homeGreetingText .greetingSub {
+  margin: 0;
+  text-align: center;
+}
+
+/* The old single "For you" list (home greeting) has been replaced by
+   the shared two-section OutputsAndPerformanceLists component (Figma
+   node 2123:2012) — see OutputsAndPerformanceLists.module.css. */
+
+/* ---------------- Topic-focused greeting (contextual entry) ---------------- */
+
+.greetingTopicHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.greetingTopicIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: var(--color-neutral-800);
+  flex-shrink: 0;
+}
+
+.greetingTopicIcon i {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.quickList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quickPill {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid rgba(223, 227, 230, 0.1);
+  border-radius: 100px;
+  background-color: var(--color-neutral-800);
+  color: var(--color-datavis-purple-100);
+  font-family: var(--type-h4-family);
+  font-size: 14px;
+  font-weight: var(--type-h4-weight);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.quickPill:hover {
+  background-color: var(--color-neutral-700);
+  border-color: rgba(175, 153, 255, 0.3);
+}
+
+/* ================================================================
+   Ask view
+   ================================================================ */
+
+/* The panel's own diagonal gradient (set on .panel in
+   OliviaPanel.module.css) shows through as ambient color; the Ask
+   tab's actual content — conversation, suggestions, and composer —
+   sits together in one inset, opaque card (.chatCard) on top of it.
+   Per Figma node 2038:101/2038:103: bg #283038, 8px radius, flush
+   with the header, 16px margin on the other three sides. */
+.askView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0 16px 16px;
+}
+
+.chatCard {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  background-color: var(--color-neutral-800);
+  overflow: hidden;
+}
+
+.log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 16px;
+}
+
+/* A conversation starts at the top of the card and grows downward
+   (Figma node 2054:118) — not bottom-anchored. */
+.logMessages {
+  justify-content: flex-start;
+}
+
+/* The composer's own footer strip within the card, below the
+   scrollable content above it — Figma node 2038:120/2038:121. No
+   divider stroke between them per the user's request; the composer's
+   own input border (see .composer/.composerExpanded) already reads
+   as the boundary. */
+.chatCardFooter {
+  flex-shrink: 0;
+  padding: 20px 16px;
+}
+
+.chatCardFooter .composer {
+  margin: 0;
+}
+
+.bubbleRow {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bubbleRowUser {
+  align-items: flex-end;
+}
+
+/* Olivia's turn carries more than the user's — a name/avatar row +
+   bubble (10px gap, see .oliviaTurnBody), then the follow-up pills
+   below it — so the row itself needs the wider 16px gap between
+   those two groups (Figma node 2054:125). */
+.bubbleRowOlivia {
+  align-items: flex-start;
+  gap: 16px;
+}
+
+/* Who-said-it row above each message — Figma nodes 2054:120 (user:
+   name then avatar, right-aligned) and 2054:127 (Olivia: avatar then
+   name, left-aligned) — mirror images of each other, matching which
+   side each speaker's bubble points toward (see border-radius below). */
+.userMessageHead {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.oliviaMessageHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.oliviaTurnBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.userMessageName,
+.oliviaMessageName {
+  margin: 0;
+  font-family: var(--type-h4-family);
+  font-size: 14px;
+  font-weight: var(--type-h4-weight);
+  color: var(--color-text-dt-default);
+}
+
+.userAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 100px;
+  flex-shrink: 0;
+  background-color: var(--color-neutral-700);
+  color: var(--color-text-dt-default);
+  font-family: var(--type-h4-family);
+  font-size: 12px;
+  font-weight: var(--type-h4-weight);
+}
+
+.bubble {
+  /* Hugs its own content up to the full row width — a short reply
+     ("Present this page") sizes to its text instead of stretching an
+     otherwise-empty bar; a long one still wraps and fills the row
+     exactly like width: 100% would. */
+  width: fit-content;
+  max-width: 100%;
+  padding: 20px;
+  background-color: var(--color-neutral-850);
+  color: var(--color-text-dt-default);
+  font-family: var(--type-body-md-family);
+  font-size: var(--type-body-md-size);
+  line-height: var(--type-body-md-leading);
+}
+
+/* Both speakers now share the same fill (Figma node 2054:101); only
+   the "pointed" corner differs, mirrored toward each one's own
+   avatar above it — square top-right for the user, square top-left
+   for Olivia. */
+.bubbleUser {
+  border-radius: 10px 0 10px 10px;
+  text-align: right;
+}
+
+.bubbleOlivia {
+  border-radius: 0 10px 10px 10px;
+}
+
+.thinking {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  padding: 14px;
+  border-radius: 0 10px 10px 10px;
+  background-color: var(--color-neutral-850);
+}
+
+.thinkingDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 100%;
+  background-color: var(--color-text-dt-grey);
+  animation: olivia-thinking 1200ms ease-in-out infinite;
+}
+
+.thinkingDot:nth-child(2) {
+  animation-delay: 150ms;
+}
+.thinkingDot:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+@keyframes olivia-thinking {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thinkingDot {
+    animation: none;
+  }
+}
+
+/* The offline report's own "generating" state (richContent:
+ * "reportGenerating") — a spinner + explicit text ("Generating
+ * offline report…") inside Olivia's ordinary reply bubble, in place
+ * of the plain 3-dot .thinking indicator. Unlike an ordinary reply
+ * being composed, this names the specific operation running and how
+ * long it can take, matching what the confirmed checklist modal
+ * (ReportGenerateModal) just promised. */
+.reportGeneratingRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reportGeneratingSpinner {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 100%;
+  border: 2px solid rgba(175, 153, 255, 0.25);
+  border-top-color: var(--color-datavis-purple-100);
+  animation: olivia-spin 800ms linear infinite;
+}
+
+@keyframes olivia-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reportGeneratingSpinner {
+    animation-duration: 2400ms;
+  }
+}
+
+/* Suggested-prompts row — Figma node 2209:40293. An ordinary child of
+   .log (not a fixed footer above .chatCardFooter's composer) — it
+   scrolls away with the rest of the conversation rather than staying
+   pinned once there's more content than fits. Reuses
+   OutputsAndPerformanceLists.module.css's .pillList/.promptPill
+   (imported as outputStyles in AskView) rather than its own copy —
+   same ghost-purple pill look used everywhere else in this file tree.
+   This replaced the old per-reply-kind pill rows that used to live
+   inline in the log (a topic answer's own follow-up pills, and
+   presentationStopped's own 2-pill row) — one consistent row, in one
+   place, after every Olivia reply instead of three narrower variants.
+   The extra margin-top (on top of .log's own 12px gap, for 24px total)
+   reads it as a separate "here's what you can do next" group rather
+   than just another turn in the conversation. */
+.suggestedFooter {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.composer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 4px 4px 16px;
+  border-radius: 100px;
+  background-color: var(--color-neutral-850);
+  border: 1px solid var(--color-neutral-600);
+  flex-shrink: 0;
+}
+
+.composerInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  color: var(--color-text-dt-default);
+  font-family: var(--type-body-md-family);
+  font-size: var(--type-body-md-size);
+}
+
+.composerInput::placeholder {
+  color: var(--color-text-dt-grey);
+}
+
+.composerInput:focus {
+  outline: none;
+}
+
+.composerSend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 100px;
+  /* Flat Datavis/Purple/100, per Figma's composer "Send" fill — not
+     the multi-stop gradient used for other Olivia-branded fills. */
+  background: var(--color-datavis-purple-100);
+  color: var(--color-text-dt-default-inverted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: filter 120ms ease, opacity 120ms ease;
+}
+
+.composerSend i {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.composerSend:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.composerSend:not(:disabled):hover {
+  filter: brightness(1.15);
+}
+
+/* ---------------- Exploration 2: expanded composer + Tools menu ----------------
+   Figma node 2059:125: a taller, two-row composer (text field, then a
+   "Tools" trigger + send button) instead of Option 1's single-row pill —
+   see .composer above. */
+
+.composerFrame {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Dismissible "set context" chip — Figma node 2066:182. Fuses visually to
+   the composer directly below it: matching side borders, no gap, and the
+   composer drops its own top border/radius (.composerExpandedJoined) so
+   the two read as one bordered shape. */
+.contextChip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border: 1px solid var(--color-neutral-600);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  background-color: var(--color-neutral-800);
+}
+
+.contextChipIcon {
+  font-size: 14px;
+  line-height: 1;
+  color: var(--color-secondary-300);
+}
+
+.contextChipLabel {
+  flex: 1;
+  font-family: var(--type-body-md-family);
+  font-size: 14px;
+  color: var(--color-secondary-300);
+}
+
+.contextChipClose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-text-dt-grey);
+  cursor: pointer;
+}
+
+.contextChipClose i {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.composerExpanded {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 16px 16px;
+  border-radius: 10px;
+  background-color: var(--color-neutral-850);
+  border: 1px solid var(--color-neutral-600);
+}
+
+/* Must come after .composerExpanded in the file — both set border/
+   border-radius, and with equal specificity the later rule in the
+   stylesheet wins regardless of class order in the JSX. Previously
+   defined above .composerExpanded, so its own full-radius/full-border
+   silently won and the "joined to the chip" look never actually
+   applied. */
+.composerExpandedJoined {
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+}
+
+.composerExpandedInput {
+  width: 100%;
+  min-height: 56px;
+  border: none;
+  background: none;
+  padding: 8px 0;
+  color: var(--color-text-dt-default);
+  font-family: var(--type-body-md-family);
+  font-size: var(--type-body-md-size);
+}
+
+.composerExpandedInput::placeholder {
+  color: var(--color-text-dt-grey);
+}
+
+.composerExpandedInput:focus {
+  outline: none;
+}
+
+.composerToolsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.toolsWrap {
+  position: relative;
+}
+
+.toolsPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px 0 16px;
+  border: 1px solid var(--color-neutral-600);
+  border-radius: 100px;
+  background-color: var(--color-neutral-800);
+  color: var(--color-text-dt-default);
+  font-family: var(--type-h4-family);
+  font-size: 14px;
+  font-weight: var(--type-h4-weight);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.toolsPill:hover {
+  background-color: var(--color-neutral-700);
+}
+
+.toolsPillIcon {
+  font-size: 14px;
+  line-height: 1;
+  color: var(--color-text-dt-grey);
+}
+
+/* Opens upward — the composer sits at the very bottom of the panel, so a
+   downward menu would clip off the bottom edge (same reasoning as the
+   header's .modeTooltip opening downward for the opposite reason).
+   Per Figma node 2093:1755 ("Tools Menu"): no heading block — each row
+   is its own icon+label line plus a full description sentence, divided
+   by hairlines instead of a separate header card. */
+.toolsMenu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  width: 280px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--color-neutral-800);
+  box-shadow: var(--shadow-dt-popup-menu);
+}
+
+.toolsMenuItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  border: none;
+  border-bottom: 1px solid rgba(223, 227, 230, 0.15);
+  background-color: var(--color-neutral-800);
+  color: var(--color-text-dt-default);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.toolsMenuItem:last-child {
+  border-bottom: none;
+}
+
+.toolsMenuItem:hover {
+  background-color: var(--color-neutral-700);
+}
+
+.toolsMenuItemHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--type-body-md-family);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.toolsMenuDescription {
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  line-height: 18px;
+  color: var(--color-text-dt-grey);
+}
+
+.toolsMenuIcon {
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+  color: var(--color-text-dt-default);
+}
+
+/* ---------------- Olivia brand mark ---------------- */
+
+.oliviaMark {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-end;
+  color: var(--color-datavis-purple-100);
+  font-family: var(--type-h4-family);
+  font-size: 11px;
+  font-weight: var(--type-h4-weight);
+  letter-spacing: 0.01em;
+}
+
+.oliviaMarkIcon {
+  font-size: 12px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Deliberate specificity bump (2 classes + attribute) so this
+   reliably beats Button.module.css's `.primary[data-theme="dark"]`
+   (1 class + attribute) regardless of CSS bundling order — not a
+   typo, and no !important needed. */
+.oliviaPrimaryButton.oliviaPrimaryButton[data-theme="dark"] {
+  background: var(--olivia-gradient);
+  box-shadow: 0 4px 14px rgba(115, 76, 255, 0.35);
+  transition: filter 120ms ease;
+}
+.oliviaPrimaryButton.oliviaPrimaryButton[data-theme="dark"]:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+.oliviaPrimaryButton.oliviaPrimaryButton[data-theme="dark"]:active:not(:disabled) {
+  filter: brightness(0.9);
+}
+
+/* Flat purple fill — NOT the --olivia-gradient treatment above.
+   Figma specs the report checklist's "Generate Report" button
+   (2189:14364, 2189:14452) as solid Datavis/Purple/100, not a
+   gradient. This also has to work in ReportGenerateModal, which
+   renders as a sibling of .panel (see its own doc comment, same
+   reasoning as ReportToast) and so has no access to --olivia-gradient
+   in the first place — that custom property is set on .panel itself
+   and only cascades to its own descendants. */
+.oliviaFlatPrimaryButton.oliviaFlatPrimaryButton[data-theme="dark"] {
+  background: var(--color-datavis-purple-100);
+  color: var(--color-text-dt-default-inverted);
+}
+.oliviaFlatPrimaryButton.oliviaFlatPrimaryButton[data-theme="dark"]:hover:not(:disabled) {
+  background: #c2b3ff;
+}
+.oliviaFlatPrimaryButton.oliviaFlatPrimaryButton[data-theme="dark"]:active:not(:disabled) {
+  background: var(--color-datavis-purple-500);
+}
+
+/* Same purple override, for `variant="textLink"` — used by the report
+   checklist modal's own "Cancel" (ReportGenerateModal), which Figma
+   has in Olivia's purple rather than the site's blue link color. Same
+   specificity-bump reasoning as .oliviaPrimaryButton above. */
+.oliviaTextLinkButton.oliviaTextLinkButton[data-theme="dark"] {
+  color: var(--color-datavis-purple-100);
+}
+.oliviaTextLinkButton.oliviaTextLinkButton[data-theme="dark"]:hover:not(:disabled) {
+  color: #c2b3ff;
+}
+.oliviaTextLinkButton.oliviaTextLinkButton[data-theme="dark"]:active:not(:disabled) {
+  color: var(--color-datavis-purple-500);
+}
+
+/* ================================================================
+   Presenter view — Figma node 2188:13194. Shares .askView/.chatCard
+   with the Ask tab (same 16px-inset card), rather than the old
+   chevron-driven deck's own bespoke .presenterView/.slideCard shell —
+   scope is now decided before this view ever opens (the header's
+   mode icon dropdown, or OutputsAndPerformanceLists' own scope menu),
+   so there's nothing left here to toggle inline.
+   ================================================================ */
+
+/* pt-12 pb-24 px-16 per Figma; the echo bubble pins to the top,
+   the avatar/narration/button group centers in the space below it. */
+.presenterBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  padding: 12px 16px 24px;
+  overflow-y: auto;
+}
+
+.presenterStage {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.presenterNarration {
+  margin: 0;
+  width: 100%;
+  font-family: var(--type-h1-family);
+  font-size: 20px;
+  font-weight: var(--type-h1-weight);
+  line-height: 1.3;
+  text-align: center;
+  color: var(--color-text-dt-default);
+}
+
+.presenterControls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* The play/pause control — Figma specs this as a flat Datavis/Purple/
+   100 circle with a dark icon, not the gradient/white-icon treatment
+   other primary Olivia buttons use elsewhere. */
+.presenterPlayButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  border: none;
+  border-radius: 100%;
+  background-color: var(--color-datavis-purple-100);
+  color: var(--color-neutral-900);
+  cursor: pointer;
+  transition: filter 120ms ease;
+}
+
+.presenterPlayButton:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.presenterPlayButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.presenterPlayButton i {
+  font-size: 24px;
+  line-height: 1;
+}
+
+/* Stop — a secondary, ghost-purple-tint circle per Figma node
+   2209:33376, same 60px size as play/pause so the two read as one
+   paired transport control, but the tinted fill (not solid) keeps it
+   from competing with play/pause for attention — "pause holds the
+   current slide, stop leaves the presentation entirely." */
+.presenterStopButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  border: none;
+  border-radius: 100%;
+  background-color: rgba(175, 153, 255, 0.15);
+  color: var(--color-datavis-purple-100);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.presenterStopButton:hover {
+  background-color: rgba(175, 153, 255, 0.25);
+}
+
+.presenterStopButton i {
+  font-size: 24px;
+  line-height: 1;
+}
+
+/* ================================================================
+   Report content (shared) — a finished report itself lives in the
+   chat now (see ReportChatCard), and the feature checklist is a
+   floating dialog (ReportGenerateModal) for both flows, not a
+   dedicated panel view. What's left here is what that dialog and
+   OliviaReportPage (the standalone full-report tab) still share: the
+   checkbox list itself, and the report body's own typography/download
+   button — which is why these are still named "report*".
+   ================================================================ */
+
+.reportTitle {
+  margin: 0;
+  font-family: var(--type-h2-family);
+  font-size: var(--type-h2-size);
+  font-weight: var(--type-h2-weight);
+  color: var(--color-text-dt-default);
+}
+
+.reportMeta {
+  margin: 0;
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  color: var(--color-text-dt-grey);
+}
+
+.reportSummary {
+  margin: 0;
+  font-family: var(--type-body-md-family);
+  font-size: var(--type-body-md-size);
+  line-height: var(--type-body-md-leading);
+  color: var(--color-text-dt-default);
+}
+
+.reportBullets {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--type-body-md-family);
+  font-size: var(--type-body-md-size);
+  color: var(--color-text-dt-default);
+}
+
+/* Ghost-purple pill per Figma node 2209:33376 (the LIVE in-chat
+   presenter's own footer — bg rgba(175,153,255,0.15), text
+   --color-datavis-purple-100) — a plain <button>, not the shared
+   Button component, since that ghost treatment isn't one of its
+   variants and this is the one place it's needed. Once the
+   presentation stops, Figma node 2209:33419 shows this same action as
+   a SOLID button instead — that's ReportChatCard.module.css's
+   .downloadButton (AskView imports it directly for that one message),
+   not this class. */
+.reportDownloadButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: fit-content;
+  height: 40px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: rgba(175, 153, 255, 0.15);
+  color: var(--color-datavis-purple-100);
+  font-family: var(--type-h4-family);
+  font-size: var(--type-h4-size);
+  font-weight: var(--type-h4-weight);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.reportDownloadButton:hover {
+  background-color: rgba(175, 153, 255, 0.22);
+}
+
+.reportDownloadButton i,
+.reportDownloadButton svg {
+  font-size: 16px;
+}
+
+/* The in-chat presenter's footer content — just the download button
+   now (an explicit minimize control briefly lived here beside it, then
+   was dropped entirely: closing the panel via the header's own Close
+   button already collapses to the mini presenter bar without ending
+   the presentation, same as that dedicated button did, so it was a
+   redundant second way to do the same thing). Centered per the user's
+   request, rather than hugging the left edge on its own. */
+.presenterFooterRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* ---------------- Feature checklist (shared) ----------------
+   The checkbox list itself, used by ReportGenerateModal's floating
+   dialog (which supplies its own header/footer chrome around this). */
+
+.featureList {
+  display: flex;
+  flex-direction: column;
+}
+
+.featureRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  border-top: 1px solid var(--color-neutral-700);
+  color: var(--color-text-dt-default);
+  font-family: var(--type-body-lg-family);
+  font-size: var(--type-body-lg-size);
+  cursor: pointer;
+}
+
+.featureRow:first-child {
+  border-top: none;
+}
+
+/* Purple, not the site's own blue — this is Olivia's checkbox
+   (Figma nodes 2189:14364/2189:14452 both use Datavis/Purple/100 for
+   the checked fill), same "purple means Olivia" rule as everything
+   else in this file (see the header comment above). */
+.checkbox {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  accent-color: var(--color-datavis-purple-100);
+  cursor: pointer;
+}
+

@@ -1,0 +1,61 @@
+/* Flex row of [pageColumn, OliviaPanel] — see OliviaDashboard.tsx's
+   own doc comment on this element for why: the panel pushes this
+   layout instead of overlaying it, so opening it actually narrows
+   pageColumn (Nav included) rather than floating on top. */
+.appShell {
+  display: flex;
+  align-items: stretch;
+  min-height: 100vh;
+}
+
+/* flex: 1 lets this shrink as OliviaPanel's width grows; min-width: 0
+   is what actually allows it to shrink past its content's own
+   min-content size (the fixed-1440px .page below) instead of forcing
+   the whole row wider — the standard flexbox-truncation pairing. */
+.pageColumn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* .page itself stays a fixed 1440px design canvas (unchanged) — this
+   is what turns that fixed width into a horizontally-scrollable
+   "window" once pageColumn is narrower than 1440px, rather than
+   overflowing into OliviaPanel's own space or forcing the whole
+   .appShell row wider than the viewport. */
+.pageScroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 1440px;
+  margin: 0 auto;
+  background-color: var(--color-neutral-900);
+}
+
+.stickyNav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding: 24px 32px 48px;
+}
+
+.safetyPagePad {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding: 24px 32px 48px;
+}

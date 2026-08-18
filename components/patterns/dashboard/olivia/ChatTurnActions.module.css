@@ -1,0 +1,97 @@
+/* Figma node 2212:43095 — the one action row every Olivia reply gets
+   (see ChatTurnActions' own doc comment). */
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.leftGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.iconButton,
+.rateButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--color-text-dt-grey);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.iconButton:hover,
+.rateButton:hover {
+  background-color: var(--color-neutral-700);
+  color: var(--color-text-dt-default);
+}
+
+/* Same hover-reveal pattern as every other icon tooltip in this file
+   tree (AskView's own .turnResetTooltip, ReportChatCard's
+   .resetTooltip) — duplicated here rather than shared since each
+   lives in its own CSS module. */
+.tooltip {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 6;
+  width: max-content;
+  max-width: 160px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background-color: var(--color-neutral-900);
+  border: 1px solid rgba(223, 227, 230, 0.1);
+  box-shadow: 0 8px 20px rgba(24, 30, 36, 0.4);
+  color: var(--color-text-dt-default);
+  font-family: var(--type-h4-family);
+  font-size: 12px;
+  font-weight: var(--type-h4-weight);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.iconButton:hover .tooltip,
+.iconButton:focus-visible .tooltip {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 300ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tooltip {
+    transition-duration: 0.01ms;
+    transition-delay: 0ms;
+  }
+}
+
+.rateGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rateLabel {
+  font-family: var(--type-body-md-family);
+  font-size: 14px;
+  color: var(--color-text-dt-grey);
+  white-space: nowrap;
+}
+
+.rateButtonActive {
+  color: var(--color-datavis-purple-100);
+  background-color: rgba(175, 153, 255, 0.15);
+}

@@ -1,0 +1,242 @@
+/* ================================================================
+   ExternalPresenterView — "external" flow's site-wide presentation.
+   A full-viewport overlay, not another panel view: a moody "device on
+   a stage" left column paired with a talking-Olivia video rail + live
+   captions on the right, per the product's own reference screenshot.
+   ================================================================ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  background-color: var(--color-neutral-900);
+  animation: external-presenter-fade 200ms ease both;
+}
+
+@keyframes external-presenter-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    animation-duration: 0.01ms;
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 100%;
+  background-color: rgba(15, 18, 22, 0.55);
+  color: var(--color-text-dt-default);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.closeButton:hover {
+  background-color: rgba(15, 18, 22, 0.8);
+}
+
+/* ---------------- Left: the "stage" ---------------- */
+
+.stage {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 56px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 900px 700px at 15% 15%, rgba(115, 76, 255, 0.28) 0%, rgba(115, 76, 255, 0) 60%),
+    radial-gradient(ellipse 700px 600px at 90% 90%, rgba(175, 153, 255, 0.14) 0%, rgba(175, 153, 255, 0) 65%),
+    linear-gradient(160deg, var(--color-neutral-850) 0%, var(--color-neutral-900) 100%);
+}
+
+.stageTag {
+  align-self: flex-start;
+  padding: 6px 14px;
+  border-radius: 4px;
+  background-color: rgba(15, 18, 22, 0.55);
+  color: var(--color-text-dt-default);
+  font-family: var(--type-h4-family);
+  font-size: 12px;
+  font-weight: var(--type-h4-weight);
+  letter-spacing: 0.02em;
+}
+
+/* A tilted "device" — evokes the reference screenshot's phone mockup
+   without reproducing a literal, unrelated marketing screenshot; the
+   trend line inside is decorative (see ExternalPresenterView.tsx). */
+.device {
+  margin: auto;
+  width: min(380px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border-radius: 20px;
+  background: linear-gradient(160deg, var(--color-neutral-800) 0%, var(--color-neutral-850) 100%);
+  border: 1px solid rgba(175, 153, 255, 0.18);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45);
+  transform: perspective(1400px) rotateX(4deg) rotateY(-8deg);
+}
+
+.deviceHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.deviceHeadLabel {
+  font-family: var(--type-h4-family);
+  font-size: 15px;
+  font-weight: var(--type-h4-weight);
+  color: var(--color-text-dt-default);
+}
+
+.deviceHeadMeta {
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  color: var(--color-text-dt-grey);
+}
+
+.stageFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 560px;
+}
+
+.stageBrand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-dt-grey);
+  font-family: var(--type-h4-family);
+  font-size: 13px;
+  font-weight: var(--type-h4-weight);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stageBrandIcon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.stageHeadline {
+  margin: 0;
+  font-family: var(--type-h1-family);
+  font-size: 32px;
+  font-weight: var(--type-h1-weight);
+  line-height: 1.2;
+  color: var(--color-text-dt-default);
+}
+
+/* ---------------- Right: the video/caption rail ---------------- */
+
+.rail {
+  flex-shrink: 0;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background-color: var(--color-neutral-850);
+  border-left: 1px solid rgba(223, 227, 230, 0.1);
+}
+
+.videoFrame {
+  flex: 1;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border-top: 3px solid var(--color-datavis-purple-100);
+  background: linear-gradient(160deg, var(--color-neutral-800) 0%, var(--color-neutral-900) 100%);
+  overflow: hidden;
+}
+
+.captionBox {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 12px;
+  background-color: rgba(15, 18, 22, 0.6);
+  border: 1px solid rgba(223, 227, 230, 0.1);
+}
+
+.captionText {
+  margin: 0;
+  color: var(--color-text-dt-default);
+  font-family: var(--type-body-md-family);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.playButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+  height: 44px;
+  border: none;
+  border-radius: 100px;
+  background-color: var(--color-datavis-purple-100);
+  color: var(--color-neutral-900);
+  font-family: var(--type-h4-family);
+  font-size: 14px;
+  font-weight: var(--type-h4-weight);
+  cursor: pointer;
+  transition: filter 120ms ease;
+}
+
+.playButton:hover {
+  filter: brightness(1.08);
+}
+
+.playButton i {
+  font-size: 15px;
+  line-height: 1;
+}
+
+@media (max-width: 860px) {
+  .overlay {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .rail {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid rgba(223, 227, 230, 0.1);
+  }
+
+  .stage {
+    padding: 40px 24px;
+  }
+
+  .stageHeadline {
+    font-size: 24px;
+  }
+}

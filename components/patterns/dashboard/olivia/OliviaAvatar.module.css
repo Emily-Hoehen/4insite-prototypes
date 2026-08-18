@@ -1,0 +1,49 @@
+/* Exact stops/positions pulled from Figma node 2038:106 (get_design_context
+   on file I7TFV5MGgQwMlRjKlwJlBT, node 2038:101). The photo-crop and skrim
+   values are percentages of the avatar's own box, so they hold at any size
+   without per-instance math. */
+
+.avatar {
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  border-radius: 100%;
+  overflow: hidden;
+  background: radial-gradient(
+    ellipse 68% 100% at 50% 100%,
+    #734cff 0%,
+    #9072ff 22%,
+    #af99ff 44%,
+    #cabfff 67%,
+    #e7e5ff 89%
+  );
+}
+
+.photoClip {
+  position: absolute;
+  top: 9.09%;
+  right: 0;
+  bottom: -5.05%;
+  left: 0;
+  overflow: hidden;
+}
+
+.photo {
+  position: absolute;
+  top: -9.02%;
+  left: -43.41%;
+  width: 184.39%;
+  height: 109.5%;
+  max-width: none;
+  object-fit: cover;
+}
+
+.skrim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 51%;
+  background: linear-gradient(to top, #734cff 0%, rgba(115, 76, 255, 0) 100%);
+  pointer-events: none;
+}

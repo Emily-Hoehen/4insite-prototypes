@@ -1,0 +1,122 @@
+/* ============================================================
+   Chart primitives — dashboard-only, driven by design tokens for
+   color and by the Figma-measured proportions for everything else.
+   ============================================================ */
+
+.barChart {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  width: 100%;
+}
+
+.barGroupCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.barGroup {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.bar {
+  display: block;
+  border-radius: 2px 2px 0 0;
+  flex-shrink: 0;
+}
+
+.barLabel {
+  font-family: var(--type-h4-family);
+  font-size: var(--type-h4-size);
+  font-weight: var(--type-h4-weight);
+  line-height: var(--type-h4-leading);
+  color: var(--color-text-dt-grey);
+}
+
+/* ---------------- Dot heatmap ---------------- */
+
+.dotHeatmap {
+  display: flex;
+  gap: 13px;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.dotMonthCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.dotMonthLabel {
+  font-family: var(--type-h4-family);
+  font-size: var(--type-h4-size);
+  font-weight: var(--type-h4-weight);
+  line-height: var(--type-h4-leading);
+  color: var(--color-text-dt-grey);
+}
+
+.dotGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 7px);
+  grid-auto-rows: 7px;
+  gap: 6px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+}
+
+/* ---------------- Donut ---------------- */
+
+.donutWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.donutLabel {
+  position: absolute;
+  font-family: var(--type-h2-family);
+  font-size: var(--type-h2-size);
+  font-weight: var(--type-h2-weight);
+  color: var(--color-text-dt-default);
+}
+
+/* ---------------- Sparkline ---------------- */
+
+.sparkline {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ---------------- Stars ---------------- */
+
+.starRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.starSlot {
+  position: relative;
+  display: inline-block;
+}
+
+.starBase,
+.starFill {
+  position: absolute;
+  inset: 0;
+}

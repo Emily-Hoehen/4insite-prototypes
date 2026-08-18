@@ -1,0 +1,293 @@
+/* Wraps the output + performance sections together (whichever order),
+   48px apart — Figma node 2196:15001's own "lists" group gap (same
+   value as the hero-to-lists gap above it, set on .homeGreeting —
+   Figma nests these as two different groups but happens to use the
+   same spacing for both here). */
+.listsGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  width: 100%;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.sectionLabel {
+  margin: 0;
+  font-family: var(--type-body-md-family);
+  font-size: 13px;
+  color: var(--color-text-dt-grey);
+  text-align: left;
+}
+
+.sectionList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Anchors OutputScopeMenu under a "list"-layout row (Presenter/
+   Dashboard only — Report has no menu, see OutputsAndPerformanceLists'
+   own handlePick). A plain wrapper div rather than adding
+   `position: relative` to .suggestItem itself, so the popover's own
+   z-stacking can't be confused with the button's hover states. */
+.suggestItemWrap {
+  position: relative;
+  width: 100%;
+}
+
+.suggestItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  min-height: 48px;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--color-neutral-850);
+  color: var(--color-text-dt-default);
+  font-family: var(--type-body-md-family);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.suggestItem:hover {
+  background-color: var(--color-neutral-700);
+}
+
+/* "Generate an Output" gets its own bordered, tinted frame around the
+   whole section (not just a per-row accent) — a visibly distinct card
+   sitting on the panel's gradient, so it reads as its own category of
+   action at a glance rather than three more rows in the same list as
+   the plain "Ask about your site performance" prompts below it. */
+.outputSection {
+  padding: 12px;
+  border: 1px solid rgba(175, 153, 255, 0.35);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(175, 153, 255, 0.14), rgba(115, 76, 255, 0.05));
+}
+
+.outputSectionLabel {
+  color: var(--color-datavis-purple-100);
+}
+
+.outputSection .suggestItem {
+  background-color: rgba(24, 30, 36, 0.35);
+}
+
+.outputSection .suggestItem:hover {
+  background-color: rgba(24, 30, 36, 0.55);
+}
+
+.suggestIcon,
+.suggestIconUniform {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.suggestIcon i,
+.suggestIconUniform i {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* "panelIcons"'s performance rows — one uniform purple tint for all
+   three topics (Figma node 2123:2012). */
+.suggestIconUniform {
+  background-color: rgba(175, 153, 255, 0.15);
+  color: var(--color-datavis-purple-100);
+}
+
+/* ================================================================
+   Card/pill primitives — no longer used by THIS component (its own
+   output section is the icon-left `.suggestItem` row style above),
+   but kept here and reused directly by HomeGreeting.tsx for its own
+   zero state (Figma-driven card grid + pill list), which imports this
+   module's classes rather than duplicating the same visual language
+   in a second stylesheet. See HomeGreeting's own doc comment.
+   ================================================================ */
+
+.outputGrid {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+}
+
+.outputCard {
+  display: flex;
+  flex: 1 0 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 20px 12px;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--color-neutral-850);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.outputCard:hover {
+  background-color: var(--color-neutral-700);
+}
+
+.outputCardIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.outputCardIcon i,
+.outputCardIcon svg {
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* One shared purple tint across HomeGreeting's site-level cards —
+   the per-mode swatch colors (mode.swatch) are only used by this
+   component's own "list" output section above. */
+.outputCardIconUniform {
+  composes: outputCardIcon;
+  background-color: rgba(175, 153, 255, 0.15);
+  color: var(--color-datavis-purple-100);
+}
+
+.outputCardLabel {
+  margin: 0;
+  width: 100%;
+  color: var(--color-text-dt-default);
+  font-family: var(--type-body-md-family);
+  font-size: 14px;
+  line-height: var(--type-body-md-leading);
+  text-align: center;
+}
+
+/* HomeGreeting's section labels carry a small leading icon (globe/
+   page-layout/comment) that this component's own plain-text
+   .sectionLabel doesn't need. */
+.sectionLabelWithIcon {
+  composes: sectionLabel;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sectionLabelWithIcon i,
+.sectionLabelWithIcon svg {
+  font-size: 13px;
+  line-height: 1;
+  color: var(--color-datavis-purple-100);
+}
+
+.pillList {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+
+.promptPill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: fit-content;
+  height: 40px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: rgba(175, 153, 255, 0.15);
+  color: var(--color-datavis-purple-100);
+  font-family: var(--type-h4-family);
+  font-size: 14px;
+  font-weight: var(--type-h4-weight);
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.promptPill:hover {
+  background-color: rgba(175, 153, 255, 0.25);
+}
+
+.promptPillIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.promptPillIcon i,
+.promptPillIcon svg {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ---------------- Presenter/Dashboard scope menu ----------------
+   "This Page View" / "All Sites" — the same choice the header's mode
+   icons ask via ModeMenuButton's own dropdown, just anchored to a
+   full-width card/row here instead of a small icon. */
+.outputScopeMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 8px;
+  background-color: var(--color-neutral-700);
+  box-shadow: var(--shadow-dt-popup-menu);
+}
+
+.outputScopeMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border: none;
+  border-bottom: 1px solid rgba(223, 227, 230, 0.15);
+  background-color: transparent;
+  color: var(--color-text-dt-default);
+  font-family: var(--type-body-md-family);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.outputScopeMenuItem:last-child {
+  border-bottom: none;
+}
+
+.outputScopeMenuItem:hover {
+  background-color: var(--color-neutral-600);
+}
+
+.outputScopeMenuIcon {
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+  color: var(--color-text-dt-grey);
+}

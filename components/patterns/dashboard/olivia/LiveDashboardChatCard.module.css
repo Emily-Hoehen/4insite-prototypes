@@ -1,0 +1,122 @@
+/* ============================================================
+   In-chat live-dashboard card — Figma node 2209:35164. Lives inside
+   Olivia's own reply bubble (see AskView), same placement as
+   ReportChatCard's report-ready card.
+   ============================================================ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.exportButton,
+.viewFullScreenButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  border: none;
+  border-radius: 4px;
+  font-family: var(--type-h4-family);
+  font-size: var(--type-h4-size);
+  font-weight: var(--type-h4-weight);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+/* Primary (solid) action — stays full-width-in-its-half via flex: 1;
+   only the secondary/ghost button beside it (.viewFullScreenButton)
+   hugs its own content, per the "secondary buttons hug their content"
+   pass across every ghost-purple button in this file tree. */
+.exportButton {
+  flex: 1;
+  background-color: var(--color-datavis-purple-100);
+  color: var(--color-text-dt-default-inverted);
+}
+
+.exportButton:hover {
+  background-color: #c2b3ff;
+}
+
+.viewFullScreenButton {
+  flex: 0 0 auto;
+  width: fit-content;
+  background-color: rgba(175, 153, 255, 0.15);
+  color: var(--color-datavis-purple-100);
+}
+
+.viewFullScreenButton:hover {
+  background-color: rgba(175, 153, 255, 0.25);
+}
+
+.exportButton i,
+.exportButton svg,
+.viewFullScreenButton i,
+.viewFullScreenButton svg {
+  font-size: 13px;
+}
+
+/* The dashboard preview itself — plain dark card per Figma (not the
+   gradient hero ReportChatCard's own .preview uses), title/date/
+   description, then the dashboard screenshot. */
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: var(--color-neutral-850);
+  color: var(--color-text-dt-default);
+}
+
+.previewTitle {
+  margin: 0;
+  font-family: var(--type-h2-family);
+  font-size: 20px;
+  font-weight: var(--type-h2-weight);
+  line-height: 1.2;
+}
+
+.previewMeta {
+  margin: -8px 0 0;
+  font-family: var(--type-body-sm-family);
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--color-text-dt-default);
+}
+
+.previewDescription {
+  margin: -8px 0 0;
+  font-family: var(--type-body-sm-family);
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--color-text-dt-default);
+}
+
+.previewImageButton {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.previewImage {
+  display: block;
+  width: 100%;
+  height: auto;
+}

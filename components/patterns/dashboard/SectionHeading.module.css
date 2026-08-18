@@ -1,0 +1,31 @@
+.heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  border-bottom: 3px solid;
+  flex-shrink: 0;
+}
+
+.chip i {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.title {
+  font-family: var(--type-h1-family);
+  font-size: var(--type-h2-size);
+  font-weight: var(--type-h2-weight);
+  line-height: var(--type-h2-leading);
+  color: var(--color-text-dt-default);
+  margin: 0;
+}

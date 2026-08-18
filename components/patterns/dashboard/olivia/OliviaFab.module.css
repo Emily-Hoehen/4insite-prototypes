@@ -1,0 +1,72 @@
+.wrap {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 61;
+  display: inline-flex;
+}
+
+.fab {
+  position: relative;
+  display: flex;
+  padding: 0;
+  border: none;
+  border-radius: 100px;
+  background: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-dt-popup-menu);
+  transition: transform 160ms ease;
+}
+
+.fab:hover {
+  transform: scale(1.05);
+}
+
+.fab:focus-visible {
+  outline: 2px solid var(--color-datavis-purple-100);
+  outline-offset: 3px;
+}
+
+/* Same purple dot + pulse-ring treatment as the nav avatar's
+   oliviaHasNotification (see Nav.module.css) — a proactive, unread
+   thing Olivia has ready, not an alert (hence purple, not the app's
+   red notification-dot color). */
+.notificationDot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 100px;
+  background-color: var(--color-datavis-purple-100);
+  border: 2px solid var(--color-neutral-900);
+  pointer-events: none;
+}
+
+.pulse .fab::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 100px;
+  border: 2px solid var(--color-datavis-purple-100);
+  opacity: 0;
+  pointer-events: none;
+  animation: olivia-fab-pulse-ring 1800ms ease-out 2;
+}
+
+@keyframes olivia-fab-pulse-ring {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse .fab::before {
+    animation: none;
+  }
+}

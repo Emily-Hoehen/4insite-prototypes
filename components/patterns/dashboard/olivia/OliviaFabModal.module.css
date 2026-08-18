@@ -1,0 +1,322 @@
+/* ============================================================
+   OliviaFabModal — Option 1's third "Global Persistent Entry"
+   variant: a small floating card anchored near OliviaFab instead of
+   a full-height slide-out panel. Colors/sizing per Figma node
+   2085:1498 ("Frame 26082151"), file I7TFV5MGgQwMlRjKlwJlBT.
+   ============================================================ */
+
+.modal {
+  position: fixed;
+  right: 24px;
+  bottom: 104px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, calc(100vw - 32px));
+  height: min(800px, calc(100vh - 140px));
+  border-radius: 16px;
+  border: 3px solid var(--color-datavis-purple-700);
+  background-color: var(--color-neutral-800);
+  box-shadow: var(--shadow-dt-popup-menu);
+  overflow: hidden;
+  transform-origin: bottom right;
+  transform: scale(0.92) translateY(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1), opacity 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modalOpen {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* ---------------- Header ---------------- */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  flex-shrink: 0;
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 4px;
+  margin: -4px;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.identity:hover {
+  background-color: rgba(223, 227, 230, 0.06);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--type-h2-family);
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--color-text-dt-default);
+}
+
+.subtitle {
+  margin: 0;
+  font-family: var(--type-body-sm-family);
+  font-size: 12px;
+  font-weight: 400;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--color-text-dt-default);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.iconButton i {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.iconButton:hover {
+  background-color: var(--color-neutral-700);
+}
+
+/* ---------------- Reset tooltip ---------------- */
+
+.resetWrap {
+  position: relative;
+}
+
+.resetTooltip {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  z-index: 6;
+  transform: translate(-50%, -4px);
+  width: max-content;
+  max-width: 160px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background-color: var(--color-neutral-900);
+  border: 1px solid rgba(223, 227, 230, 0.1);
+  box-shadow: 0 8px 20px rgba(24, 30, 36, 0.4);
+  color: var(--color-text-dt-default);
+  font-family: var(--type-h4-family);
+  font-size: 12px;
+  font-weight: var(--type-h4-weight);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.resetWrap:hover .resetTooltip,
+.iconButton:focus-visible ~ .resetTooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  transition-delay: 300ms;
+}
+
+/* ---------------- "More" dropdown (Generate an Output) ---------------- */
+
+.moreWrap {
+  position: relative;
+}
+
+.moreMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 240px;
+  padding: 4px;
+  border-radius: 12px;
+  background-color: var(--color-neutral-800);
+  box-shadow: var(--shadow-dt-popup-menu);
+}
+
+.moreMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--color-text-dt-default);
+  font-family: var(--type-body-md-family);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.moreMenuItem:hover {
+  background-color: var(--color-neutral-700);
+}
+
+.moreMenuIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.moreMenuIcon i {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ---------------- Body ---------------- */
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* No visible scrollbar anywhere inside the modal (AskView's .log, the
+ * mode views' own scroll containers, etc.) — the floating card reads
+ * cleaner without one; scrolling itself (wheel/touch/keyboard) still
+ * works. Scoped to .body's descendants only, not the whole page. */
+.body :global(*) {
+  scrollbar-width: none;
+}
+
+.body :global(*)::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------------- Zero-state greeting (Figma node 2085:1508) ---------------- */
+
+.greeting {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 8px 0 16px;
+}
+
+.greetingHero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.greetingText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.greetingHeadline {
+  margin: 0;
+  font-family: var(--type-h2-family);
+  font-size: 18px;
+  font-weight: var(--type-h2-weight);
+  color: var(--color-text-dt-default);
+}
+
+.greetingSub {
+  margin: 0;
+  font-family: var(--type-body-md-family);
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--color-text-dt-grey);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionLabel {
+  margin: 0;
+  font-family: var(--type-body-md-family);
+  font-size: 13px;
+  color: var(--color-text-dt-grey);
+}
+
+.sectionList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.suggestItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  min-height: 48px;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--color-neutral-850);
+  color: var(--color-text-dt-default);
+  font-family: var(--type-body-md-family);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.suggestItem:hover {
+  background-color: var(--color-neutral-700);
+}
+
+.suggestIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.suggestIcon i {
+  font-size: 16px;
+  line-height: 1;
+}
