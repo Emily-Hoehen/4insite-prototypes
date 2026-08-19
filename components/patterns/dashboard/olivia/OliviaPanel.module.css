@@ -17,8 +17,8 @@
 /* Pushes the page rather than overlaying it: a real flex sibling of
    OliviaDashboard's page column (see .appShell/.pageColumn there),
    not a `position: fixed` layer floating over everything. This outer
-   slot is what actually animates — width 0 -> 420px, clipped via
-   overflow: hidden — while .panel itself (below) stays a fixed 420px
+   slot is what actually animates — width 0 -> 440px, clipped via
+   overflow: hidden — while .panel itself (below) stays a fixed 440px
    so its own content never squishes mid-transition; growing the slot
    just reveals more of it. `position: sticky` keeps it pinned to the
    viewport as the (possibly much taller) page scrolls beside/beneath
@@ -39,7 +39,7 @@
 }
 
 .panelSlotOpen {
-  width: min(420px, 100vw);
+  width: min(440px, 100vw);
 }
 
 .panel {
@@ -48,7 +48,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  width: min(420px, 100vw);
+  width: min(440px, 100vw);
   height: 100%;
   overflow: hidden;
   /* Panel background image, public/olivia/gradient2.png — replaces the

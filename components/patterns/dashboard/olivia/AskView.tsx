@@ -15,6 +15,7 @@ import { MODES, TOOLS_MENU_ORDER } from "./OliviaPanel";
 import type { OliviaEntryContext, OliviaPanelVariant, OliviaView } from "./OliviaPanel";
 import { ChatTurnActions } from "./ChatTurnActions";
 import { HomeGreeting } from "./HomeGreeting";
+import type { ZeroStateVariant } from "./ZeroStateSwitcher";
 import { LiveDashboardPreviewCard } from "./LiveDashboardChatCard";
 import { OliviaAvatar } from "./OliviaAvatar";
 import { PageSummaryChatCard } from "./PageSummaryChatCard";
@@ -55,10 +56,10 @@ export type ChatMessage = {
    *    useOliviaSession's stopPresentation) — carries the same
    *    "Download Presentation Report" action the presenter view's own
    *    footer offered, so leaving that view doesn't strand it.
-   *  - "liveDashboard": "Generate a live dashboard of page view"'s own
-   *    reply (see useOliviaSession's generateLiveDashboard) — a preview
-   *    of the dashboard plus Export/View Full Screen actions, Figma
-   *    node 2209:35164.
+   *  - "liveDashboard": "Generate a live dashboard of page/site view"'s
+   *    own reply (see useOliviaSession's generateLiveDashboard) — a
+   *    preview of the dashboard plus Export/View Full Screen actions,
+   *    Figma node 2209:35164. Needs `dashboardScope` alongside it.
    *  - "pageSummary": "Summarize page view"'s own reply (see
    *    useOliviaSession's generatePageSummary/addCurrentViewToSummary)
    *    — a text-level summary of one or more pages, Figma nodes
@@ -87,6 +88,17 @@ export type ChatMessage = {
   summaryPageIds?: SummaryPageId[];
   /** Only set alongside richContent: "serviceAnalysis". */
   serviceAnalysis?: ServiceAnalysis;
+  /** Only set alongside richContent: "liveDashboard" — which scope this
+   * particular dashboard was generated for, so it keeps showing the
+   * right preview/full-screen view regardless of what a later message
+   * generates (see useOliviaSession's generateLiveDashboard). */
+  dashboardScope?: OliviaScope;
+  /** Only set alongside richContent: "liveDashboard" and
+   * dashboardScope: "page" — which page-specific preview image/copy to
+   * show (see LiveDashboardPreviewCard's own COPY_BY_PAGE), for pages
+   * that have their own instead of the generic page-scope default.
+   * Currently just Quality's own "Scope of Work" branding. */
+  dashboardPageVariant?: "scopeOfWork";
 };
 
 export function AskView({
@@ -102,6 +114,7 @@ export function AskView({
   onSelectPrompt,
   onOpenMode,
   renderZeroState,
+  zeroStateVariant,
   onViewLiveDashboardFullScreen,
   currentSummaryPageId = "home",
   onSummarizePage,
@@ -143,9 +156,18 @@ export function AskView({
    * greeting (Figma node 2085:1498) uses this to reuse AskView's
    * message log + composer without inheriting its greeting screen. */
   renderZeroState?: () => React.ReactNode;
+  /** Which of HomeGreeting's two current zero-state references to show
+   * (ZeroStateSwitcher, rendered by OliviaDashboard on the home page
+   * itself, outside this panel entirely) — meaningless when
+   * `renderZeroState` replaces HomeGreeting altogether. Defaults to
+   * "v1" so callers that don't thread it through (any caller besides
+   * OliviaPanel/OliviaFabModal) still render something. */
+  zeroStateVariant?: ZeroStateVariant;
   /** LiveDashboardPreviewCard's "View Full Screen" — only meaningful for
-   * a message with richContent: "liveDashboard". */
-  onViewLiveDashboardFullScreen?: () => void;
+   * a message with richContent: "liveDashboard". Takes that message's
+   * own `dashboardScope` so the right full-screen view opens (see
+   * useOliviaSession's openLiveDashboardFullScreen). */
+  onViewLiveDashboardFullScreen?: (scope: OliviaScope) => void;
   /** PageSummaryChatCard's own props — only meaningful for a message
    * with richContent: "pageSummary". `currentSummaryPageId` is which
    * page THIS session is on right now (see useOliviaSession), used
@@ -263,6 +285,7 @@ export function AskView({
                  prompts below just point at whatever topic she was opened
                  with, same as the context chip in the composer below. */
               <HomeGreeting
+                variant={zeroStateVariant ?? "v1"}
                 onPickTopic={onSelectPrompt}
                 onOpenMode={(mode, scope) => onOpenMode(mode, currentTopic, scope)}
                 onSummarizePage={onSummarizePage}
@@ -343,7 +366,11 @@ export function AskView({
                               cards above — the dashboard preview lives inside
                               Olivia's own reply bubble, not a separate panel view. */}
                           {message.richContent === "liveDashboard" && (
-                            <LiveDashboardPreviewCard onViewFullScreen={() => onViewLiveDashboardFullScreen?.()} />
+                            <LiveDashboardPreviewCard
+                              scope={message.dashboardScope ?? "page"}
+                              pageVariant={message.dashboardPageVariant}
+                              onViewFullScreen={() => onViewLiveDashboardFullScreen?.(message.dashboardScope ?? "page")}
+                            />
                           )}
                           {/* Same placement again — the summary itself lives
                               inside Olivia's own reply bubble. Copy/reset/
@@ -414,22 +441,30 @@ export function AskView({
             {/* Suggested-prompts row — Figma node 2209:40293. A sibling of
                 .logMessages within .log (not nested inside it) so it can be
                 bottom-pinned on its own — see .suggestedFooter's own comment
-                in OliviaViews.module.css. Scrolls away with the rest of the
-                conversation instead of staying stuck at the bottom once
-                there's more content than fits — shows after any finished
-                Olivia reply on every screen, not just specific reply kinds.
-                Same three rows, same copy, same order, and same per-item
-                colors as the zero state's own "View page level insights"
-                list (see HomeGreeting) — not the uniform-purple .promptPill
-                these used to be. */}
-            {showSuggestedFooter && (
+                in OliviaViews.module.css. Only for ZeroStateVariant "v1"/
+                "v2" — "v3" gets the pinned, horizontally-scrolling version
+                below instead (outside .log entirely), per the user's own
+                request to keep this one's original scrolling/stacked
+                behavior for "v1"/"v2" specifically rather than switching
+                every variant over to the newer treatment. Scrolls away
+                with the rest of the conversation once there's more content
+                than fits — shows after any finished Olivia reply on every
+                screen, not just specific reply kinds. Same three rows,
+                same copy, same order, and same per-item colors as the zero
+                state's own "View page level insights" list at variant "v1"
+                (see HomeGreeting) — this row doesn't switch with
+                ZeroStateSwitcher itself beyond the v1-or-v2-vs-v3 branch
+                (there's no zero state left to switch once a conversation
+                exists), so it always matches "v1" specifically, not the
+                uniform-purple .promptPill "v2" uses instead. */}
+            {showSuggestedFooter && zeroStateVariant !== "v3" && (
               <div className={styles.suggestedFooter}>
                 <div className={outputStyles.pillList}>
-                  <button type="button" className={outputStyles.promptPillSkyBlue} onClick={() => onSummarizePage?.()}>
+                  <button type="button" className={outputStyles.promptPillPrimaryBlue} onClick={() => onSummarizePage?.()}>
                     <span className={outputStyles.promptPillIcon}>
                       <ListIcon />
                     </span>
-                    Summarize page view
+                    Summarize this page
                   </button>
                   <button
                     type="button"
@@ -439,7 +474,7 @@ export function AskView({
                     <span className={outputStyles.promptPillIcon}>
                       <FinancialsIcon />
                     </span>
-                    Live dashboard of page view
+                    View live Dashboard of Page
                   </button>
                   <button
                     type="button"
@@ -449,11 +484,59 @@ export function AskView({
                     <span className={outputStyles.promptPillIcon}>
                       <VolumeIcon />
                     </span>
-                    Present this page
+                    Present Page
                   </button>
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Suggested-prompts row, ZeroStateVariant "v3" only — Figma node
+            2209:40293, restyled per Figma node 2297:22894 (HomeGreeting's
+            own "v3"). A sibling of .log/.chatCardFooter within .chatCard
+            (not nested inside .log the way "v1"/"v2" get above), so it
+            stays pinned directly above the composer regardless of scroll
+            position instead of scrolling away with the conversation.
+            Same three actions, same copy, same order (Summarize, Present,
+            Dashboard), and same per-item colors as the zero state's own
+            pinned page-level row at variant "v3" (see HomeGreeting).
+            .pillRowScrollPadded/.promptPillTight are the same
+            horizontally-scrolling, tight-gap treatment "v3"'s own pinned
+            page-level row uses — see that class's own comment for why
+            this one needs the "Padded" variant specifically. */}
+        {showSuggestedFooter && zeroStateVariant === "v3" && (
+          <div className={styles.pillRowScrollPadded}>
+            <button
+              type="button"
+              className={[outputStyles.promptPillPrimaryBlue, outputStyles.promptPillTight].join(" ")}
+              onClick={() => onSummarizePage?.()}
+            >
+              <span className={outputStyles.promptPillIcon}>
+                <ListIcon />
+              </span>
+              Summarize Page
+            </button>
+            <button
+              type="button"
+              className={[outputStyles.promptPillPinkle, outputStyles.promptPillTight].join(" ")}
+              onClick={() => onOpenMode("presenter", currentTopic, "page")}
+            >
+              <span className={outputStyles.promptPillIcon}>
+                <VolumeIcon />
+              </span>
+              Present Page
+            </button>
+            <button
+              type="button"
+              className={[outputStyles.promptPillRedOrange, outputStyles.promptPillTight].join(" ")}
+              onClick={() => onOpenMode("dashboard", currentTopic, "page")}
+            >
+              <span className={outputStyles.promptPillIcon}>
+                <FinancialsIcon />
+              </span>
+              View Page Dashboard
+            </button>
           </div>
         )}
 

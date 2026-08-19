@@ -1,0 +1,446 @@
+/* ============================================================
+   Site-scoped live-dashboard full screen — content transcribed from
+   public/dashboard/Site Dashboard.png, shell styled to match the
+   page-scoped LiveDashboardFullScreen's own screenshot (see this
+   component's own doc comment for the split). Same overlay pattern as
+   that sibling and ExternalPresenterView: position: fixed, outlives
+   the side panel's own open/close transform.
+   ============================================================ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  background-color: var(--color-neutral-900);
+  animation: site-dashboard-fade 200ms ease both;
+}
+
+@keyframes site-dashboard-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    animation-duration: 0.01ms;
+  }
+}
+
+.scroll {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.headerMain {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* Purple, not the page-scoped screenshot's blue — per the user's own
+   request, this one badge and .exportButton below are Olivia's own
+   accent (Datavis/Purple/100) rather than the site's blue, since
+   Olivia generated this dashboard. */
+.headerIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 100%;
+  background-color: var(--color-datavis-purple-100);
+  color: var(--color-text-dt-default-inverted);
+}
+
+.headerIcon i,
+.headerIcon svg {
+  font-size: 20px;
+}
+
+.headerText {
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--type-h2-family);
+  font-size: var(--type-h2-size);
+  font-weight: var(--type-h2-weight);
+  line-height: 1.25;
+  color: var(--color-text-dt-default);
+}
+
+.meta {
+  margin: 4px 0 0;
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  color: var(--color-text-dt-grey);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.exportButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--color-datavis-purple-100);
+  color: var(--color-text-dt-default-inverted);
+  font-family: var(--type-h4-family);
+  font-size: var(--type-h4-size);
+  font-weight: var(--type-h4-weight);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.exportButton:hover {
+  background-color: #c2b3ff;
+}
+
+.exportButton i,
+.exportButton svg {
+  font-size: 13px;
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 100%;
+  background-color: rgba(223, 227, 230, 0.08);
+  color: var(--color-text-dt-default);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.closeButton:hover {
+  background-color: rgba(223, 227, 230, 0.15);
+}
+
+.description {
+  margin: -8px 0 0;
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  line-height: 18px;
+  color: var(--color-text-dt-grey);
+}
+
+.card {
+  padding: 20px;
+  border-radius: 10px;
+  background-color: var(--color-neutral-800);
+  border: 1px solid var(--color-neutral-700);
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: var(--type-h3-family);
+  font-size: var(--type-h3-size);
+  font-weight: 700;
+  color: var(--color-text-dt-default);
+}
+
+.cardDescription {
+  margin: 4px 0 0;
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  line-height: 18px;
+  color: var(--color-text-dt-grey);
+}
+
+/* ---------------- Metrics table ---------------- */
+
+.tableHeaderRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--color-neutral-700);
+  color: var(--color-text-dt-grey);
+  font-family: var(--type-h4-family);
+  font-size: 12px;
+  font-weight: var(--type-h4-weight);
+}
+
+.trendHeaderCell {
+  text-align: right;
+}
+
+.metricRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--color-neutral-700);
+}
+
+.metricRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.metricLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-text-dt-default);
+  font-family: var(--type-h4-family);
+  font-size: var(--type-h4-size);
+  font-weight: var(--type-h4-weight);
+}
+
+.metricIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 100%;
+  color: var(--color-text-dt-default-inverted);
+}
+
+.metricIcon i,
+.metricIcon svg {
+  font-size: 15px;
+}
+
+/* Icon-badge colors sampled directly from Site Dashboard.png — Hours
+   Worked's own blue is the app's closest matching token
+   (Datavis/Sky-Blue/500); Safety Streak, Audit Performance, and
+   Complaints all sample to effectively the same bright teal
+   (Datavis/Teal/500) in the source image, so all three share it here
+   too rather than inventing distinct colors the reference doesn't
+   have; Report Its samples to Datavis/Purple/500. */
+.iconSkyBlue {
+  background-color: var(--color-datavis-sky-blue-500);
+}
+
+.iconTeal {
+  background-color: var(--color-datavis-teal-500);
+}
+
+.iconPurple {
+  background-color: var(--color-datavis-purple-500);
+}
+
+.metricValue {
+  color: var(--color-text-dt-default);
+  font-family: var(--type-h2-family);
+  font-size: 18px;
+  font-weight: var(--type-h2-weight);
+}
+
+.valueTeal {
+  color: var(--color-datavis-teal-500);
+}
+
+.metricUnit {
+  color: var(--color-text-dt-grey);
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  font-weight: 400;
+}
+
+.metricTrend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  color: var(--color-text-dt-grey);
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  text-align: right;
+}
+
+.trendIcon {
+  display: flex;
+  color: var(--color-datavis-teal-500);
+}
+
+.trendIcon i,
+.trendIcon svg {
+  font-size: 12px;
+}
+
+/* ---------------- Charts (Trends line, Audit bars) ---------------- */
+
+.chartSvg {
+  width: 100%;
+  height: auto;
+  margin-top: 16px;
+  overflow: visible;
+}
+
+.gridLine {
+  stroke: rgba(223, 227, 230, 0.1);
+  stroke-width: 1;
+}
+
+.axisLabel {
+  fill: var(--color-text-dt-grey);
+  font-family: var(--type-body-sm-family);
+  font-size: 12px;
+}
+
+.trendLine {
+  stroke: var(--color-datavis-sky-blue-500);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.trendDot {
+  fill: var(--color-datavis-sky-blue-500);
+}
+
+.auditBar {
+  fill: var(--color-datavis-sky-blue-500);
+}
+
+/* ---------------- Daily Assignments table ---------------- */
+
+.assignmentsTable {
+  margin-top: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--color-neutral-700);
+  overflow: hidden;
+}
+
+.assignmentsHeaderRow {
+  display: grid;
+  grid-template-columns: 0.6fr 1fr 1.6fr;
+  padding: 12px 16px;
+  background-color: var(--color-neutral-850);
+  color: var(--color-text-dt-grey);
+  font-family: var(--type-h4-family);
+  font-size: 12px;
+  font-weight: var(--type-h4-weight);
+}
+
+.assignmentsRow {
+  display: grid;
+  grid-template-columns: 0.6fr 1fr 1.6fr;
+  padding: 14px 16px;
+  border-top: 1px solid var(--color-neutral-700);
+  color: var(--color-text-dt-default);
+  font-family: var(--type-h4-family);
+  font-size: var(--type-h4-size);
+  font-weight: 400;
+}
+
+/* ---------------- Executive Summary ---------------- */
+
+.summaryText {
+  margin: 12px 0 0;
+  color: var(--color-text-dt-default);
+  font-family: var(--type-body-md-family);
+  font-size: var(--type-body-md-size);
+  line-height: var(--type-body-md-leading);
+}
+
+.calloutList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--color-neutral-700);
+  background-color: var(--color-neutral-850);
+}
+
+.calloutIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 100%;
+  margin-top: 2px;
+}
+
+.calloutIcon i,
+.calloutIcon svg {
+  font-size: 12px;
+}
+
+.calloutIconSuccess {
+  background-color: rgba(0, 255, 141, 0.15);
+  color: var(--color-success-500);
+}
+
+.calloutIconWarning {
+  background-color: rgba(255, 193, 8, 0.15);
+  color: var(--color-warning-500);
+}
+
+.calloutIconNeutral {
+  background-color: var(--color-text-dt-default);
+  color: var(--color-neutral-900);
+}
+
+.calloutTitle {
+  margin: 0;
+  color: var(--color-text-dt-default);
+  font-family: var(--type-h4-family);
+  font-size: var(--type-h4-size);
+  font-weight: var(--type-h4-weight);
+}
+
+.calloutDescription {
+  margin: 4px 0 0;
+  color: var(--color-text-dt-grey);
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  line-height: 18px;
+}
+
+@media (min-width: 720px) {
+  .tableHeaderRow,
+  .metricRow {
+    grid-template-columns: 1.4fr 1fr 1fr;
+  }
+}

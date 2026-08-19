@@ -12,8 +12,13 @@
   margin-top: 12px;
 }
 
+/* Stacked full-width now, not split one row in half — View Full
+   Screen leads (solid/primary) since seeing the dashboard is the more
+   likely next step than exporting it sight unseen; Export trails as
+   the ghost/secondary action. */
 .actions {
   display: flex;
+  flex-direction: column;
   gap: 12px;
   width: 100%;
 }
@@ -24,6 +29,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  width: 100%;
   height: 40px;
   border: none;
   border-radius: 4px;
@@ -34,28 +40,21 @@
   transition: background-color 120ms ease;
 }
 
-/* Both buttons split the row evenly (flex: 1 each) so together they
-   run edge-to-edge with the chat bubble instead of
-   .viewFullScreenButton hugging its own "View Full Screen" + icon
-   content — that used to overflow past the bubble's own max-width in
-   a narrow panel, clipping the button's right edge. */
-.exportButton {
-  flex: 1;
+.viewFullScreenButton {
   background-color: var(--color-datavis-purple-100);
   color: var(--color-text-dt-default-inverted);
 }
 
-.exportButton:hover {
+.viewFullScreenButton:hover {
   background-color: #c2b3ff;
 }
 
-.viewFullScreenButton {
-  flex: 1;
+.exportButton {
   background-color: rgba(175, 153, 255, 0.15);
   color: var(--color-datavis-purple-100);
 }
 
-.viewFullScreenButton:hover {
+.exportButton:hover {
   background-color: rgba(175, 153, 255, 0.25);
 }
 
@@ -78,6 +77,15 @@
   border-radius: 10px;
   background-color: var(--color-neutral-850);
   color: var(--color-text-dt-default);
+}
+
+/* Site scope skips the text block entirely (see hasTextBlock) — with
+   nothing else in the card, the image can fill it edge-to-edge
+   instead of sitting inset inside .preview's own 20px padding, so it
+   reads as exactly as wide as .actions' buttons above it rather than
+   narrower. */
+.previewNoPadding {
+  padding: 0;
 }
 
 .previewTitle {
@@ -113,6 +121,14 @@
   overflow: hidden;
   cursor: pointer;
   line-height: 0;
+}
+
+/* Matches .previewNoPadding's own 0 padding above — the image's own
+   corners are the card's corners now (no inset text block sitting
+   above them), so this needs .preview's full 10px radius, not the
+   smaller 6px .previewImageButton uses when it's inset. */
+.previewImageButtonFullBleed {
+  border-radius: 10px;
 }
 
 .previewImage {

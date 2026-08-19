@@ -31,6 +31,18 @@ function summaryPageIdFor(activePage: ActivePage): SummaryPageId {
   return activePage === "quality" || activePage === "safety" ? activePage : "home";
 }
 
+/** generateLiveDashboard's own "for {page}" wording, and which pages
+ * get their own preview image/copy (LiveDashboardChatCard's
+ * `pageVariant` prop) rather than the generic page-scope default —
+ * currently just Quality, whose real branding in this app is "Scope
+ * of Work" (see QualityMegaMenu's own doc comment on that). */
+const PAGE_DASHBOARD_LABEL: Record<ActivePage, string> = {
+  home: "Home",
+  safety: "Safety",
+  communications: "Communications",
+  quality: "Scope of Work",
+};
+
 /** Same idea as PROTOTYPE_VARIANT_STORAGE_KEY (OliviaDashboard.tsx) —
  * Home/Quality/Safety are separate routes, each a fresh mount of this
  * hook, so "Add current view to summary" (added on one page) has to
@@ -274,11 +286,12 @@ export function useOliviaSession(
       return;
     }
     // Same treatment as "report" — a chat reply (Figma node 2209:35164),
-    // not a mode view, so it never reaches setView below. Always
-    // page-scoped in practice (every entry point that offers it is), so
-    // `pickedScope` isn't read here.
+    // not a mode view, so it never reaches setView below. Site-scoped
+    // now too (the header's own dashboard icon, HEADER_MODE_ORDER) —
+    // generateLiveDashboard reads pickedScope to choose Site Dashboard.png
+    // vs Live Dashboard.png (see LiveDashboardChatCard).
     if (mode === "dashboard") {
-      generateLiveDashboard();
+      generateLiveDashboard(pickedScope);
       return;
     }
     setScope(pickedScope);
@@ -309,11 +322,11 @@ export function useOliviaSession(
       openReportModal();
       return;
     }
+    const resolvedScope = explicitScope ?? scope;
     if (mode === "dashboard") {
-      generateLiveDashboard();
+      generateLiveDashboard(resolvedScope);
       return;
     }
-    const resolvedScope = explicitScope ?? scope;
     if (mode === "presenter" && resolvedScope === "site") {
       setIsExternalPresenterOpen(true);
       return;
@@ -384,27 +397,47 @@ export function useOliviaSession(
     setIsPresenterPlaying(true);
   };
 
-  /** "Generate a live dashboard of page view" — a chat reply (Figma
-   * node 2209:35164), not a mode switch (see pickMode/openMode's
+  /** "Generate a live dashboard of page/site view" — a chat reply
+   * (Figma node 2209:35164), not a mode switch (see pickMode/openMode's
    * "dashboard" branch above): posts the request and Olivia's own
    * "ready" reply carrying the dashboard preview card in one turn,
    * same shape as the offline report flow just without a generating
    * beat in between — Figma's own reference only shows the finished
-   * state, no spinner, for this one. */
-  const generateLiveDashboard = () => {
+   * state, no spinner, for this one. `dashboardScope`/`dashboardPageVariant`
+   * both ride on the message itself (not just read live off `scope`/
+   * `activePage`) so a reply already in the chat keeps showing
+   * whatever it was generated as, even if a later message generates a
+   * different scope or is asked from a different page — see
+   * LiveDashboardPreviewCard. Reply text names *which* site/page it
+   * was generated for (PAGE_DASHBOARD_LABEL for page scope, "your
+   * site" for site scope) rather than staying generic. */
+  const generateLiveDashboard = (dashboardScope: OliviaScope) => {
+    const dashboardPageVariant = dashboardScope === "page" && activePage === "quality" ? "scopeOfWork" : undefined;
+    const target = dashboardScope === "site" ? "your site" : PAGE_DASHBOARD_LABEL[activePage];
     setMessages((prev) => [
       ...prev,
-      { id: nextMessageId(), role: "user", text: "Generate live dashboard of page view" },
+      { id: nextMessageId(), role: "user", text: `Generate live dashboard of ${dashboardScope} view` },
       {
         id: nextMessageId(),
         role: "olivia",
-        text: "Your live dashboard has successfully been generated",
+        text: `Your live dashboard has successfully been generated for ${target}.`,
         richContent: "liveDashboard",
+        dashboardScope,
+        dashboardPageVariant,
       },
     ]);
   };
 
-  const openLiveDashboardFullScreen = () => setIsLiveDashboardFullScreenOpen(true);
+  /** Which full-screen view "View Full Screen" opens — the page-scoped
+   * screenshot (LiveDashboardFullScreen) or the site-scoped coded page
+   * (SiteDashboardFullScreen) — set from the specific message's own
+   * `dashboardScope` when it's clicked (see AskView), not read live off
+   * `scope`, for the same reason generateLiveDashboard doesn't either. */
+  const [liveDashboardFullScreenScope, setLiveDashboardFullScreenScope] = useState<OliviaScope>("page");
+  const openLiveDashboardFullScreen = (dashboardScope: OliviaScope) => {
+    setLiveDashboardFullScreenScope(dashboardScope);
+    setIsLiveDashboardFullScreenOpen(true);
+  };
   const closeLiveDashboardFullScreen = () => setIsLiveDashboardFullScreenOpen(false);
 
   /** "Summarize page view" (Figma nodes 2209:36698/2209:36788) — like
@@ -680,6 +713,7 @@ export function useOliviaSession(
     closeExternalPresenter,
     stopSitePresentation,
     isLiveDashboardFullScreenOpen,
+    liveDashboardFullScreenScope,
     openLiveDashboardFullScreen,
     closeLiveDashboardFullScreen,
     currentSummaryPageId,

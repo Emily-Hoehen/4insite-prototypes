@@ -82,6 +82,14 @@
   text-align: center;
 }
 
+/* HomeGreeting's own row-hero variant (Figma node 2294:21839) tightened
+   this gap to 40px — scoped to a second class rather than editing
+   .homeGreeting directly, since PanelContextGreeting still uses that
+   shared class's own 48px for its own stacked hero. */
+.homeGreetingGap40 {
+  gap: 40px;
+}
+
 .homeGreetingHero {
   display: flex;
   flex-direction: column;
@@ -146,6 +154,144 @@
 /* The old single "For you" list (home greeting) has been replaced by
    the shared two-section OutputsAndPerformanceLists component (Figma
    node 2123:2012) — see OutputsAndPerformanceLists.module.css. */
+
+/* ---------------- Home greeting, centered hero (Figma node
+   2297:22894 "Zero State 3", née "Zero State 4" before the old
+   "Zero State 3" reference was dropped and this one renumbered down
+   to take its place) ----------------
+   Stacked/centered like .homeGreetingHero, but a bigger 101px avatar,
+   a tighter 16px gap, and Headers/H2 20px text (matching
+   .homeGreetingTextRow's own sizing) instead of .homeGreetingHero's
+   24px gap + H1 22px — a third, separate pair of classes for the same
+   reason .homeGreetingHeroRow is its own pair rather than a modifier:
+   none of these three hero treatments should be able to drift into
+   each other by accident. */
+.homeGreetingHeroCentered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  text-align: center;
+}
+
+.homeGreetingHeroCentered .greetingHeadline {
+  text-align: center;
+  font-family: var(--type-h2-family);
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.3;
+}
+
+/* "v3" only — Figma's own outer group splits into two children
+   instead of .homeGreeting's single centered stack: a flex: 1 inner
+   group (hero, site-level cards, suggested prompts — still centered
+   exactly like .homeGreeting itself) and a second, natural-height
+   sibling pinned below it (the page-level insights row, scrolling
+   horizontally — see .pillRowScroll). The inner group's own flex: 1
+   is what actually pins the second sibling to the bottom; this class
+   only needs to stop .homeGreeting's own justify-content: center from
+   centering the *pair* of them instead of letting the first one fill
+   the space. */
+.homeGreetingSplit {
+  justify-content: flex-start;
+}
+
+.homeGreetingCenterGroup {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  width: 100%;
+}
+
+/* .pillRowScroll — a horizontally-scrolling page-level insights row,
+   no vertical stack + section header the way every other variant's
+   page-level section has one. Used two places now: "v3"'s own zero
+   state (pinned below .homeGreetingCenterGroup) and AskView's
+   post-reply suggested-prompts row (a sibling of .log/.chatCardFooter
+   there, always visible above the composer regardless of scroll
+   position — see AskView's own comment on why that one moved out of
+   .log entirely to get this same treatment). The border/padding-top
+   read as this row joining the composer as one footer unit below it,
+   per Figma node 2297:22894's own reference — separate from whatever
+   scrollable content sits above. Same thin-scrollbar treatment as
+   OliviaPanel.module.css's own .body, adapted for a horizontal track. */
+.pillRowScroll {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  padding-top: 16px;
+  padding-bottom: 8px;
+  border-top: 1px solid var(--color-neutral-700);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-neutral-600) transparent;
+}
+
+.pillRowScroll > * {
+  flex-shrink: 0;
+}
+
+.pillRowScroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.pillRowScroll::-webkit-scrollbar-thumb {
+  background-color: var(--color-neutral-600);
+  border-radius: 8px;
+}
+
+.pillRowScroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* "v3"'s own zero-state usage specifically — nested inside .log
+   (unlike AskView's sibling usage below), so its border/content sit
+   inset by .log's own 16px horizontal padding by default; negative
+   left/right margins break the *border* out to the card's true full
+   width while padding of the same amount keeps the *content* (the
+   pills) visually aligned with everything else in the panel. The
+   negative bottom margin reaches through .log's own 24px
+   padding-bottom, .chatCardFooter's 20px padding-top, and .composer's
+   own 4px padding-top (the actual <input> sits inside that, one layer
+   further in than .chatCardFooter itself) the same way
+   .previewImageButtonFullBleed/the old .suggestedFooter did — see
+   either of those for the general technique. -38.5px is tuned by
+   measurement (rendered gap, not just the nominal paddings summed by
+   hand) to land the visible gap above the composer at exactly 16px,
+   per the user's own request, instead of the ~52px all those paddings
+   would otherwise stack up to. */
+.pillRowScrollFullBleed {
+  composes: pillRowScroll;
+  /* .pillRowScroll's own width: 100% is fixed relative to its
+     containing block (.log's content box) — negative margins alone
+     shift a 100%-wide box left without growing it, so the border
+     would just move 16px left instead of reaching the card's true
+     right edge too. calc() grows the box itself by the same 32px the
+     margins pull it out by, so both edges actually land flush with
+     .chatCard's own edges. */
+  width: calc(100% + 32px);
+  margin: 0 -16px -38.5px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-bottom: 0;
+}
+
+/* AskView's own usage — a direct sibling of .log/.chatCardFooter
+   within .chatCard (which has no padding of its own; every child
+   supplies its own, same as .chatCardFooter's own 16px), not nested
+   inside .log the way the zero state's copy of this row is — that one
+   already sits inside .log's own 16px horizontal padding, so adding
+   it again here would double it. */
+.pillRowScrollPadded {
+  composes: pillRowScroll;
+  padding-left: 16px;
+  padding-right: 16px;
+}
 
 /* ---------------- Topic-focused greeting (contextual entry) ---------------- */
 
@@ -225,15 +371,15 @@
   overflow: hidden;
 }
 
-/* The scroll container. Once a conversation exists it holds two direct
-   children: .logMessages (the turns themselves, top-anchored, sized to
-   their own content) and .suggestedFooter (bottom-pinned — see its own
-   comment below). gap here is the FLOOR of the space between those two
-   — .suggestedFooter's own margin-top:auto adds whatever's left on top
-   of it, so a short conversation still gets this same minimum even
-   though most of the extra space collects there instead of below the
-   footer. On the zero-state branch .log has only one child (the
-   greeting), so the gap never applies. */
+/* The scroll container. Holds one child on the zero-state branch (the
+   greeting) or with ZeroStateVariant "v3" (.logMessages alone — "v3"'s
+   own suggested-prompts row lives outside .log entirely instead, as a
+   .chatCard-level sibling — see .pillRowScrollPadded's own comment
+   near .chatCardFooter below). "v1"/"v2" still get two: .logMessages
+   plus .suggestedFooter, back to its original bottom-pinned behavior
+   (see that class's own comment) — gap is the FLOOR of the space
+   between those two specifically; harmless when there's only the one
+   child. */
 .log {
   flex: 1;
   min-height: 0;
@@ -245,12 +391,10 @@
 }
 
 /* The turns themselves — one entry per message (bubbleRow) plus the
-   thinking indicator, own 32px gap between each pair (the same value
-   .log used to apply directly before .suggestedFooter moved out to be
-   its own sibling — see that class's comment). A conversation starts
-   at the top of the card and grows downward (Figma node 2054:118), so
-   this group takes only its natural content height rather than
-   stretching — the leftover room in .log collects below it instead. */
+   thinking indicator, 32px gap between each pair. A conversation
+   starts at the top of the card and grows downward (Figma node
+   2054:118), so this group takes only its natural content height
+   rather than stretching. */
 .logMessages {
   display: flex;
   flex-direction: column;
@@ -455,40 +599,36 @@
   }
 }
 
-/* Suggested-prompts row — Figma node 2209:40293. A sibling of
-   .logMessages within .log (not nested inside it, and not a fixed
-   footer pinned above .chatCardFooter's composer either) — it still
-   scrolls away with the rest of the conversation rather than staying
-   stuck once there's more content than fits. Reuses
-   OutputsAndPerformanceLists.module.css's .pillList/.promptPill
-   (imported as outputStyles in AskView) rather than its own copy —
-   same ghost-purple pill look used everywhere else in this file tree.
-   This replaced the old per-reply-kind pill rows that used to live
-   inline in the log (a topic answer's own follow-up pills, and
-   presentationStopped's own 2-pill row) — one consistent row, in one
-   place, after every Olivia reply instead of three narrower variants.
+/* AskView's post-reply suggested-prompts row, ZeroStateVariant "v1"/
+   "v2" only — back to its original behavior per the user's own
+   request: a sibling of .logMessages within .log (not the pinned,
+   horizontally-scrolling .pillRowScrollPadded sibling of .log itself
+   that "v3" gets instead — see AskView's own comment on that split),
+   so it scrolls away with the rest of the conversation rather than
+   staying stuck once there's more content than fits, left-aligned and
+   stacked one per row via .pillList.
 
    margin-top: auto is the flexbox trick for bottom-pinning a child
    inside a column flex container: it consumes whatever room is left
    over in .log beyond .logMessages' own content height, so a short
    exchange (one question, one reply) ends with this row sitting flush
-   just above the composer instead of leaving a gap of dead space below
-   it. .log's own 32px gap is still the floor — once the conversation
-   is tall enough to fill or overflow the panel, there's no free space
-   left for the auto margin to claim, so this settles back to that same
-   32px, same as the space between any other two turns.
+   just above the composer instead of leaving a gap of dead space
+   below it. .logMessages' own 32px inter-turn gap doesn't apply here
+   since this is a sibling of that group, not a member of it — there's
+   no shared floor the way there briefly was when .log itself carried
+   that gap (see .logMessages' own comment) — so this settles to 0
+   once the conversation overflows, not 32px.
 
    margin-bottom: -24px cancels out .log's own 24px padding-bottom
    (the reserved chin auto-margin still respects as free space,
    pushing this row down but leaving that padding empty beneath it) —
    without it, the pills would sit 24px above that padding PLUS
    .chatCardFooter's own 20px padding-top above the composer, 44px
-   total. Per the user's request the gap above the composer should
-   read as 20px, i.e. exactly .chatCardFooter's own padding-top and
-   nothing from .log's — so this row alone reaches into that reserved
-   chin rather than .log's padding-bottom changing for every other
-   case that relies on it (the zero state's centering, and any reply
-   that ends without a footer). */
+   total. The gap above the composer should read as 20px, i.e. exactly
+   .chatCardFooter's own padding-top and nothing from .log's — so this
+   row alone reaches into that reserved chin rather than .log's
+   padding-bottom changing for every other case that relies on it (the
+   zero state's centering, and any reply that ends without a footer). */
 .suggestedFooter {
   width: 100%;
   margin-top: auto;
@@ -868,10 +1008,22 @@
   color: var(--color-text-dt-default);
 }
 
+/* Minimize, play/pause, stop, left to right — Figma node 2267:14094.
+   24px gap between the three (up from the old play/stop pair's 16px)
+   now that there's a third control to read as one row instead of one
+   paired control. */
 .presenterControls {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 24px;
+}
+
+/* Wraps each individual control (button + its own hover tooltip) —
+   `position: relative` anchors .presenterControlTooltip below without
+   that positioning leaking onto the button itself (which still needs
+   its own border-radius/overflow for the circular hit area). */
+.presenterControlWrap {
+  position: relative;
 }
 
 /* The play/pause control — Figma specs this as a flat Datavis/Purple/
@@ -906,12 +1058,14 @@
   line-height: 1;
 }
 
-/* Stop — a secondary, ghost-purple-tint circle per Figma node
-   2209:33376, same 60px size as play/pause so the two read as one
-   paired transport control, but the tinted fill (not solid) keeps it
-   from competing with play/pause for attention — "pause holds the
-   current slide, stop leaves the presentation entirely." */
-.presenterStopButton {
+/* Shared secondary-control treatment — a ghost-purple-tint circle,
+   same 60px size as play/pause so every control in the row reads as
+   one paired transport, but the tinted (not solid) fill keeps them
+   from competing with play/pause for attention. Minimize and Stop
+   both compose this rather than repeating it (Figma node 2267:14094
+   gives them the identical look, just different icons/positions —
+   minimize on the left of play/pause, stop on the right). */
+.presenterSecondaryButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -926,13 +1080,80 @@
   transition: background-color 120ms ease;
 }
 
-.presenterStopButton:hover {
+.presenterSecondaryButton:hover {
   background-color: rgba(175, 153, 255, 0.25);
 }
 
-.presenterStopButton i {
+.presenterSecondaryButton i {
   font-size: 24px;
   line-height: 1;
+}
+
+/* "Minimize" — collapses the panel to PresenterMiniBar without
+   stopping the presentation (see PresenterView's own onMinimize doc
+   comment); sits to the left of play/pause per Figma node 2267:14094,
+   the mirror position of Stop on the right. */
+.presenterMinimizeButton {
+  composes: presenterSecondaryButton;
+}
+
+/* Stop — leaves the presentation entirely, distinct from Minimize's
+   "keep it running, just get it out of the way" ("pause holds the
+   current slide, stop leaves the presentation entirely"). */
+.presenterStopButton {
+  composes: presenterSecondaryButton;
+}
+
+/* Hover/focus tooltip for the row's three controls — same visual
+   treatment as the header's .modeTooltip (OliviaPanel.module.css),
+   just a local copy: this row sits low in the panel body, close to
+   the footer's Download button below it, so it opens *upward*
+   instead of .modeTooltip's downward (which only works because the
+   header sits at the very top of the viewport). */
+.presenterControlTooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  z-index: 6;
+  transform: translate(-50%, 4px);
+  width: max-content;
+  max-width: 160px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background-color: var(--color-neutral-900);
+  border: 1px solid rgba(223, 227, 230, 0.1);
+  box-shadow: 0 8px 20px rgba(24, 30, 36, 0.4);
+  color: var(--color-text-dt-default);
+  font-family: var(--type-h4-family);
+  font-size: 12px;
+  font-weight: var(--type-h4-weight);
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.presenterControlTooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--color-neutral-900);
+}
+
+.presenterControlWrap:hover .presenterControlTooltip,
+.presenterControlWrap button:focus-visible ~ .presenterControlTooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  transition-delay: 300ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .presenterControlTooltip {
+    transition-duration: 0.01ms;
+  }
 }
 
 /* ================================================================
