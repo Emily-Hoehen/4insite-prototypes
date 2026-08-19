@@ -1,0 +1,38 @@
+/* Same segmented-pill visual language as PrototypeSwitcher's own
+   .group/.option — a smaller, single-row version of it, since this
+   only ever has the one choice (which zero-state version) rather than
+   PrototypeSwitcher's category + variant pair. */
+.switcher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  padding: 2px;
+  margin-bottom: 8px;
+  border-radius: 100px;
+  background-color: var(--color-neutral-800);
+}
+
+.option {
+  flex: 1;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 100px;
+  background: none;
+  color: var(--color-text-dt-grey);
+  font-family: var(--type-h4-family);
+  font-size: 11px;
+  font-weight: var(--type-h4-weight);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.option:hover {
+  color: var(--color-text-dt-default);
+}
+
+.optionActive {
+  background-color: var(--color-neutral-700);
+  color: var(--color-text-dt-default);
+}

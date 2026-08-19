@@ -125,8 +125,26 @@ export function InfoCircleIcon({ className }: IconProps) {
   return fa("solid", "circle-info", className);
 }
 
+/** Site dashboard's own "Safety Streak" metric (public/dashboard/Site
+ * Dashboard.png). */
+export function ShieldIcon({ className }: IconProps) {
+  return fa("solid", "shield", className);
+}
+
+/** Site dashboard's own "Complaints"/"Audit Volume" callouts. */
+export function TriangleExclamationIcon({ className }: IconProps) {
+  return fa("solid", "triangle-exclamation", className);
+}
+
 export function ExternalLinkIcon({ className }: IconProps) {
   return fa("solid", "arrow-up-right-from-square", className);
+}
+
+/** "View Full Screen" — a fullscreen-expand glyph, distinct from
+ * ExternalLinkIcon's "opens elsewhere" arrow (this opens in place,
+ * over the current view). */
+export function ExpandIcon({ className }: IconProps) {
+  return fa("solid", "up-right-and-down-left-from-center", className);
 }
 
 export function SyncIcon({ className }: IconProps) {
@@ -187,6 +205,17 @@ export function PauseIcon({ className }: IconProps) {
 
 export function StopIcon({ className }: IconProps) {
   return fa("solid", "stop", className);
+}
+
+/** PresenterView's own "minimize" control (Figma node 2267:14094,
+ * whose own glyph is "picture-in-picture" — not in this project's FA
+ * Pro Kit; confirmed via computed `content` that it renders nothing,
+ * same class of gap as ClipboardCheckIcon's own comment). "compress"
+ * is the closest equivalent this kit actually has: collapses the
+ * presenter's side panel down to PresenterMiniBar without stopping
+ * the presentation itself. */
+export function PictureInPictureIcon({ className }: IconProps) {
+  return fa("solid", "compress", className);
 }
 
 export function DocumentIcon({ className }: IconProps) {

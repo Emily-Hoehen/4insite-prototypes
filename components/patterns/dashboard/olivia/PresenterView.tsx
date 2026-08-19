@@ -1,7 +1,7 @@
 "use client";
 
 import { Dispatch, SetStateAction, useEffect } from "react";
-import { PauseIcon, PlayCircleIcon, StopIcon } from "../../icons";
+import { PauseIcon, PictureInPictureIcon, PlayCircleIcon, StopIcon } from "../../icons";
 import { getPresenterSlides, OliviaScope, OliviaTopic, PRESENTER_INTRO_SLIDE, presenterNarration } from "./oliviaContent";
 import { OliviaAvatar } from "./OliviaAvatar";
 import styles from "./OliviaViews.module.css";
@@ -17,6 +17,7 @@ export function PresenterView({
   isLoading,
   scope,
   onStop,
+  onMinimize,
   index,
   setIndex,
   isPlaying,
@@ -34,6 +35,13 @@ export function PresenterView({
    * stopPresentation) — distinct from pause, which just holds the
    * current slide without leaving this view. */
   onStop: () => void;
+  /** Collapses the side panel down to PresenterMiniBar (Figma node
+   * 2267:14094's picture-in-picture control) without stopping the
+   * presentation — the same result as closing the panel from the
+   * header while presenting (see OliviaPanel's handleClose and
+   * isPresenterMinimized), just reachable from the controls row
+   * itself instead of only the header's X. */
+  onMinimize: () => void;
   /** Slide progress lives in useOliviaSession, not local state here —
    * see its own doc comment on presenterIndex/isPresenterPlaying for
    * why: OliviaPanel's mini presenter bar needs to read and control the
@@ -88,30 +96,58 @@ export function PresenterView({
             <p className={styles.presenterNarration} aria-live="polite">
               {presenterNarration(slide)}
             </p>
-            {/* Play/pause first, stop second — Figma node 2209:33376's own
-                reading order (the primary transport control leads, stop
-                trails as the secondary action). */}
+            {/* Minimize, play/pause, stop — Figma node 2267:14094's own
+                reading order (minimize leads on the left, the primary
+                transport control sits center, stop trails on the right
+                as the secondary action). Each gets its own hover/focus
+                tooltip (.presenterControlTooltip) since none of the
+                three otherwise carry a visible label. */}
             <div className={styles.presenterControls}>
-              <button
-                type="button"
-                className={styles.presenterPlayButton}
-                disabled={isLoading}
-                onClick={() => {
-                  if (isLastSlide && !isPlaying) setIndex(0);
-                  setIsPlaying((p) => !p);
-                }}
-                aria-label={isPlaying ? "Pause presentation" : isLastSlide ? "Restart presentation" : "Play presentation"}
-              >
-                {isPlaying ? <PauseIcon /> : <PlayCircleIcon />}
-              </button>
-              <button
-                type="button"
-                className={styles.presenterStopButton}
-                onClick={onStop}
-                aria-label="Stop presentation"
-              >
-                <StopIcon />
-              </button>
+              <span className={styles.presenterControlWrap}>
+                <button
+                  type="button"
+                  className={styles.presenterMinimizeButton}
+                  onClick={onMinimize}
+                  aria-label="Minimize presentation"
+                >
+                  <PictureInPictureIcon />
+                </button>
+                <span className={styles.presenterControlTooltip} role="tooltip">
+                  Minimize
+                </span>
+              </span>
+
+              <span className={styles.presenterControlWrap}>
+                <button
+                  type="button"
+                  className={styles.presenterPlayButton}
+                  disabled={isLoading}
+                  onClick={() => {
+                    if (isLastSlide && !isPlaying) setIndex(0);
+                    setIsPlaying((p) => !p);
+                  }}
+                  aria-label={isPlaying ? "Pause presentation" : isLastSlide ? "Restart presentation" : "Play presentation"}
+                >
+                  {isPlaying ? <PauseIcon /> : <PlayCircleIcon />}
+                </button>
+                <span className={styles.presenterControlTooltip} role="tooltip">
+                  {isPlaying ? "Pause" : isLastSlide ? "Restart" : "Play"}
+                </span>
+              </span>
+
+              <span className={styles.presenterControlWrap}>
+                <button
+                  type="button"
+                  className={styles.presenterStopButton}
+                  onClick={onStop}
+                  aria-label="Stop presentation"
+                >
+                  <StopIcon />
+                </button>
+                <span className={styles.presenterControlTooltip} role="tooltip">
+                  Stop
+                </span>
+              </span>
             </div>
           </div>
         </div>

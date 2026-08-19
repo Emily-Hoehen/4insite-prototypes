@@ -10,10 +10,12 @@ import { OliviaAvatar } from "./OliviaAvatar";
 import { PanelContextGreeting } from "./PanelContextGreeting";
 import { ExternalPresenterView } from "./ExternalPresenterView";
 import { LiveDashboardFullScreen } from "./LiveDashboardFullScreen";
+import { SiteDashboardFullScreen } from "./SiteDashboardFullScreen";
 import { PresenterMiniBar } from "./PresenterMiniBar";
 import { ReportGenerateModal } from "./ReportGenerateModal";
 import { ReportToast } from "./ReportToast";
 import { useOliviaSession } from "./useOliviaSession";
+import type { ZeroStateVariant } from "./ZeroStateSwitcher";
 import styles from "./OliviaPanel.module.css";
 
 /** "report" and "dashboard" are both kept in this union purely as mode
@@ -124,15 +126,17 @@ export const MODES: {
  * touched. */
 export const TOOLS_MENU_ORDER: Exclude<OliviaView, "ask">[] = ["report", "presenter", "dashboard"];
 
-/** Header mode-icon order — Report, then Presentation, dropping
- * Dashboard entirely. The zero state's new site/page split (see
- * HomeGreeting) makes Dashboard a page-only output with no separate
- * "which scope?" question of its own, so it no longer needs a header
- * icon; Report and Presenter both still act as one-click shortcuts to
- * the same *page-scoped* actions their zero-state rows do (Report
- * opens the checklist modal; Presenter goes straight to "Present this
- * page" — see ModeMenuButton's `hasScopeMenu={false}` below). */
-export const HEADER_MODE_ORDER: Exclude<OliviaView, "ask">[] = ["report", "presenter"];
+/** Header mode-icon order — Report, Presentation, then Dashboard, per
+ * Figma node 2273:15746 ("Zero State"), which re-added a third header
+ * icon for it. All three are one-click *site*-scoped shortcuts now —
+ * Report opens the checklist modal (scope is never actually read
+ * there); Presenter and Dashboard both go straight to the site-wide
+ * version of their mode, same destination as HomeGreeting's own
+ * "Site Presentation"/"Live Site Dashboard" cards (Dashboard briefly
+ * had no header icon at all, back when it was still a page-only
+ * output with no "which scope?" question of its own — see git
+ * history on this constant). */
+export const HEADER_MODE_ORDER: Exclude<OliviaView, "ask">[] = ["report", "presenter", "dashboard"];
 
 /** What Olivia knows about *why* she's being opened — drives which greeting AskView shows. */
 export type OliviaEntryContext = { kind: "home" } | { kind: "topic"; topic: OliviaTopic };
@@ -177,6 +181,7 @@ export function OliviaPanel({
   initialTopic = null,
   initialPageLabel,
   activePage = "home",
+  zeroStateVariant,
   onPresenterMinimizedChange,
 }: {
   isOpen: boolean;
@@ -215,6 +220,11 @@ export function OliviaPanel({
    * "Summarize page view" reads this (see useOliviaSession), to pick
    * which PAGE_SUMMARY_SECTIONS entry "the current view" means. */
   activePage?: "home" | "safety" | "communications" | "quality";
+  /** Which of HomeGreeting's two current zero-state references to show
+   * (see ZeroStateSwitcher) — owned by the caller (OliviaDashboard,
+   * rendered on the home page itself) same as `variant`/`onVariantChange`
+   * are, since it's a property of the whole prototype, not this panel. */
+  zeroStateVariant?: ZeroStateVariant;
   /** Fires whenever the mini presenter bar's own visibility would
    * change (panel closed while still on the presenter view) — lets
    * "fabPanel" (the only variant with a FAB of its own to worry about)
@@ -345,18 +355,18 @@ export function OliviaPanel({
             )}
           </button>
 
-          {/* Two one-click shortcuts, up top and always reachable — Report
-              and Presenter (Dashboard dropped entirely; see
-              HEADER_MODE_ORDER's own doc comment for why). Report opens
-              the checklist modal regardless of scope; Presenter goes
-              straight to the full site presentation (Figma node
-              2196:15112's own "Site Presentation" tooltip) — the same
-              destination as the zero state's "Begin an Olivia site
-              presentation" card. Presenting *this* page instead is only
-              reachable from that zero-state row now, not the header.
-              "panelContext" moves this same set into the composer's
-              Tools menu instead (see AskView), so the header stays
-              clear here. */}
+          {/* Three one-click shortcuts, up top and always reachable —
+              Report, Presenter, Dashboard (HEADER_MODE_ORDER; see its own
+              doc comment). Report opens the checklist modal regardless of
+              scope; Presenter and Dashboard both go straight to the full
+              *site*-scoped version of their mode (Figma node 2196:15112's
+              own "Site Presentation" tooltip for Presenter) — the same
+              destination as the zero state's "Site Presentation"/"Live
+              Site Dashboard" cards. Presenting/viewing *this page*
+              instead is only reachable from the zero state's page-level
+              row, not the header. "panelContext" moves this same set
+              into the composer's Tools menu instead (see AskView), so
+              the header stays clear here. */}
           {variant === "panelIcons" && (
             <>
               <div className={styles.modeGroup}>
@@ -366,8 +376,15 @@ export function OliviaPanel({
                     <ModeMenuButton
                       key={mode.id}
                       icon={mode.icon}
-                      label={mode.label}
-                      onClick={() => session.pickMode(mode.id, mode.id === "presenter" ? "site" : "page")}
+                      // Report/Presenter's own MODES labels already read as
+                      // site-scoped ("Generate Offline Report", "Site
+                      // Presentation"); Dashboard's shared label ("Live
+                      // Dashboard", also used page-scoped in the Tools menu)
+                      // doesn't, so this header instance overrides it to
+                      // match HomeGreeting's own "Live Site Dashboard" card
+                      // instead of touching the shared MODES entry.
+                      label={mode.id === "dashboard" ? "Live Site Dashboard" : mode.label}
+                      onClick={() => session.pickMode(mode.id, mode.id === "report" ? "page" : "site")}
                     />
                   );
                 })}
@@ -440,6 +457,7 @@ export function OliviaPanel({
                     )
                   : undefined
               }
+              zeroStateVariant={zeroStateVariant}
               onViewLiveDashboardFullScreen={session.openLiveDashboardFullScreen}
               currentSummaryPageId={session.currentSummaryPageId}
               onSummarizePage={session.generatePageSummary}
@@ -454,6 +472,7 @@ export function OliviaPanel({
               isLoading={isThinking}
               scope={scope}
               onStop={session.stopPresentation}
+              onMinimize={handleClose}
               index={session.presenterIndex}
               setIndex={session.setPresenterIndex}
               isPlaying={session.isPresenterPlaying}
@@ -484,9 +503,12 @@ export function OliviaPanel({
         <ExternalPresenterView topic={topic} onClose={session.stopSitePresentation} />
       )}
 
-      {session.isLiveDashboardFullScreenOpen && (
-        <LiveDashboardFullScreen onClose={session.closeLiveDashboardFullScreen} />
-      )}
+      {session.isLiveDashboardFullScreenOpen &&
+        (session.liveDashboardFullScreenScope === "site" ? (
+          <SiteDashboardFullScreen onClose={session.closeLiveDashboardFullScreen} />
+        ) : (
+          <LiveDashboardFullScreen onClose={session.closeLiveDashboardFullScreen} />
+        ))}
 
       {/* The in-chat presenter, minimized — panel closed (Minimize or
           Close, either one) while still on the presenter view, so

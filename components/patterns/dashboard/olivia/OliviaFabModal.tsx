@@ -12,8 +12,10 @@ import { PresenterView } from "./PresenterView";
 import { ReportGenerateModal } from "./ReportGenerateModal";
 import { ReportToast } from "./ReportToast";
 import { LiveDashboardFullScreen } from "./LiveDashboardFullScreen";
+import { SiteDashboardFullScreen } from "./SiteDashboardFullScreen";
 import type { ReportFlowVariant } from "./OliviaPanel";
 import type { useOliviaSession } from "./useOliviaSession";
+import type { ZeroStateVariant } from "./ZeroStateSwitcher";
 import styles from "./OliviaFabModal.module.css";
 
 /** "Generate an Output" list — same three modes as the side panel's
@@ -96,6 +98,7 @@ export function OliviaFabModal({
   onRequestOpen,
   session,
   reportFlowVariant = "chat",
+  zeroStateVariant,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -109,6 +112,8 @@ export function OliviaFabModal({
    * (useOliviaSession's own second argument), since that's what
    * actually drives pickMode/openMode's behavior. */
   reportFlowVariant?: ReportFlowVariant;
+  /** Same as the identical prop on OliviaPanel — see ZeroStateSwitcher. */
+  zeroStateVariant?: ZeroStateVariant;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -272,6 +277,7 @@ export function OliviaFabModal({
                 onPickPrompt={(t, q) => session.askTopic(t, q)}
               />
             )}
+            zeroStateVariant={zeroStateVariant}
             onViewLiveDashboardFullScreen={session.openLiveDashboardFullScreen}
             currentSummaryPageId={session.currentSummaryPageId}
             onSummarizePage={session.generatePageSummary}
@@ -286,6 +292,7 @@ export function OliviaFabModal({
             isLoading={isThinking}
             scope={scope}
             onStop={session.stopPresentation}
+            onMinimize={handleClose}
             index={session.presenterIndex}
             setIndex={session.setPresenterIndex}
             isPlaying={session.isPresenterPlaying}
@@ -308,9 +315,12 @@ export function OliviaFabModal({
         <ExternalPresenterView topic={topic} onClose={session.stopSitePresentation} />
       )}
 
-      {session.isLiveDashboardFullScreenOpen && (
-        <LiveDashboardFullScreen onClose={session.closeLiveDashboardFullScreen} />
-      )}
+      {session.isLiveDashboardFullScreenOpen &&
+        (session.liveDashboardFullScreenScope === "site" ? (
+          <SiteDashboardFullScreen onClose={session.closeLiveDashboardFullScreen} />
+        ) : (
+          <LiveDashboardFullScreen onClose={session.closeLiveDashboardFullScreen} />
+        ))}
 
       {/* Sibling of .modal, not a child — same reasoning as OliviaPanel's
           own toast: this has to outlive .modal's own open/close transform.
