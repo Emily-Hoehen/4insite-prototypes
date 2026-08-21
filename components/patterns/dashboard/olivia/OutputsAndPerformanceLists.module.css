@@ -114,54 +114,12 @@
    Row/pill/grid primitives — no longer used by THIS component (its
    own output section is the icon-left `.suggestItem` row style
    above), but kept here and reused directly by HomeGreeting.tsx for
-   its own zero state (Figma-driven output list/grid + pill list),
-   which imports this module's classes rather than duplicating the
-   same visual language in a second stylesheet. See HomeGreeting's own
-   doc comment.
+   its own zero state (Figma-driven output grid + pill lists), which
+   imports this module's classes rather than duplicating the same
+   visual language in a second stylesheet. See HomeGreeting's own doc
+   comment. */
 
-   HomeGreeting's ZeroStateSwitcher currently toggles between two live
-   Figma references for the site-level section specifically, so both
-   shapes stay here side by side rather than one replacing the other:
-   .outputList/.outputRow (a vertical stack of full-width icon-left
-   rows, Figma node 2294:21839 — "Zero State 2") and
-   .outputGrid/.outputCard (a 3-up grid, icon above a centered label,
-   Figma node 2273:16012 — "Zero State 1"). Same bordered dark-card
-   look either way, just reoriented. */
-
-.outputList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-.outputRow {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
-  padding: 16px;
-  border: 1px solid var(--color-neutral-700);
-  border-radius: 4px;
-  background-color: var(--color-neutral-850);
-  cursor: pointer;
-  transition: background-color 120ms ease;
-}
-
-/* "Zero State 2" (Figma node 2273:15746, latest revision) — same row
-   otherwise, just its own 20px/24px padding instead of .outputRow's
-   uniform 16px. See ZeroStateSwitcher. */
-.outputRowV2 {
-  composes: outputRow;
-  padding: 20px 24px;
-}
-
-.outputRow:hover {
-  background-color: var(--color-neutral-700);
-}
-
-/* "Zero State 1" (Figma node 2273:16012) — the 3-up grid, .outputRow's
-   own row-layout counterpart. */
+/* The zero state's site-level 3-up grid (Figma node 2281:20356). */
 .outputGrid {
   display: flex;
   align-items: stretch;
@@ -171,9 +129,15 @@
 
 .outputCard {
   display: flex;
-  flex: 1 0 0;
+  /* flex-shrink: 1 (not .promptPill's usual 0) — three across is tight
+     even at the docked desktop panel's 440px, and the narrowest mobile
+     viewports (see OliviaPanel.module.css's own @media (max-width:
+     860px) block) are narrower still. min-width: 0 is what actually
+     lets a flex child shrink below its own content's natural width;
+     shrink: 0 would ignore that floor and overflow the row instead. */
+  flex: 1 1 0;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   gap: 12px;
   min-width: 0;
@@ -205,37 +169,33 @@
   line-height: 1;
 }
 
-/* One shared purple tint across HomeGreeting's site-level rows/cards —
-   the per-mode swatch colors (mode.swatch) are only used by this
-   component's own "list" output section above. Figma node 2255:45851
-   briefly gave each site-level card its own accent
-   (teal/yellow-orange) instead; every reference since has gone back
-   to this one uniform tint for all three, so this is the version in
-   use again. */
-.outputIconUniform {
+/* Each site-level card gets its own icon-well color per Figma node
+   2281:20356 — Offline Report teal, Site Presentation yellow-orange,
+   Live Site Dashboard red-orange (the same red-orange as the
+   page-level "View live dashboard of page" pill below). An earlier
+   reference (2255:45851) briefly gave each card its own accent this
+   same way before a run of later ones went back to one uniform purple
+   tint for all three; this is that per-card treatment again. */
+.outputIconTeal {
   composes: outputIcon;
-  background-color: rgba(175, 153, 255, 0.15);
-  color: var(--color-datavis-purple-100);
+  background-color: rgba(128, 255, 231, 0.15);
+  color: var(--color-datavis-teal-100);
 }
 
-/* Roboto Medium per Figma — same weight as .promptPill's own label,
-   not the plain-body weight this used to inherit. Left-aligned and
-   flex: 1 to fill the row's remaining width next to its icon —
-   .outputRow's own label. */
-.outputRowLabel {
-  flex: 1;
-  min-width: 0;
-  margin: 0;
-  color: var(--color-text-dt-default);
-  font-family: var(--type-h4-family);
-  font-size: 14px;
-  font-weight: var(--type-h4-weight);
-  line-height: 20px;
-  text-align: left;
+.outputIconYellowOrange {
+  composes: outputIcon;
+  background-color: rgba(255, 201, 128, 0.15);
+  color: var(--color-datavis-yellow-orange-100);
 }
 
-/* .outputCard's own label — centered, stacked *under* its icon,
-   unlike .outputRowLabel's left-aligned "beside its icon" layout. */
+.outputIconRedOrange {
+  composes: outputIcon;
+  background-color: rgba(255, 138, 128, 0.15);
+  color: var(--color-datavis-red-orange-100);
+}
+
+/* .outputCard's own label — left-aligned, stacked *under* its icon,
+   matching that card's own items: flex-start. */
 .outputCardLabel {
   margin: 0;
   width: 100%;
@@ -244,7 +204,7 @@
   font-size: 14px;
   font-weight: var(--type-h4-weight);
   line-height: 20px;
-  text-align: center;
+  text-align: left;
 }
 
 /* Header/H4 (bold), white — not .sectionLabel's own smaller grey body
@@ -273,15 +233,6 @@
   width: 100%;
 }
 
-/* Zero State 3's own page-level pills (Figma node 2297:22469) center
-   each pill instead of running them full-width/left-aligned — .promptPill
-   is already `width: fit-content`, so centering the list is the only
-   change actually needed here. */
-.pillListCentered {
-  composes: pillList;
-  align-items: center;
-}
-
 .promptPill {
   display: flex;
   align-items: center;
@@ -308,10 +259,9 @@
 
 /* Per-item tinting applied to a whole pill (bg + text + icon, which
    inherits `color` from its parent) rather than just an icon well —
-   matches Figma's page-level rows, each tinted its own color instead
-   of .promptPill's default uniform purple. The site-level rows above
-   went back to one shared tint (see .outputIconUniform's own
-   comment); these page-level pills keep their per-item colors. */
+   matches Figma's page-level rows, each tinted its own color, same as
+   the site-level cards' own per-card icon wells above (see
+   .outputIconTeal's own comment). */
 /* "Summarize page view" — Core/Primary/100 (#80c2ff), not a Datavis
    token like its siblings below. Confirmed against Figma's own
    selection-colors panel for this pill: Core/Primary/100 solid at
@@ -348,12 +298,13 @@
   background-color: rgba(217, 128, 255, 0.25);
 }
 
-/* Zero State 3's own page-level pills (Figma node 2297:22469) tighten
-   the icon-to-label gap and switch to one uniform 12px padding instead
-   of .promptPill's own 8px gap / 12px-16px padding — applied as a
-   second class alongside whichever color variant a pill already uses
-   (e.g. `[promptPillPrimaryBlue, promptPillTight]`), not a composed
-   replacement for it, since it only overrides these two properties. */
+/* The zero state's own page-level pills (Figma node 2281:20356)
+   tighten the icon-to-label gap and switch to one uniform 12px padding
+   instead of .promptPill's own 8px gap / 12px-16px padding — applied
+   as a second class alongside whichever color variant a pill already
+   uses (e.g. `[promptPillPrimaryBlue, promptPillTight]`), not a
+   composed replacement for it, since it only overrides these two
+   properties. */
 .promptPillTight {
   gap: 4px;
   padding: 12px;

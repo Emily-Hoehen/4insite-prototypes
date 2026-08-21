@@ -31,7 +31,6 @@ import type { CommCenterOpenRequest } from "./olivia/CommunicationCenterPanel";
 import { OliviaFab } from "./olivia/OliviaFab";
 import { OliviaFabModal } from "./olivia/OliviaFabModal";
 import { ALL_OLIVIA_VARIANTS, PrototypeSwitcher } from "./olivia/PrototypeSwitcher";
-import { ZeroStateSwitcher, type ZeroStateVariant } from "./olivia/ZeroStateSwitcher";
 import styles from "./OliviaDashboard.module.css";
 
 /** The /explore comparison pages' Home, Safety, and Communications are
@@ -147,12 +146,6 @@ export function OliviaDashboard({
   // and client) to avoid a hydration mismatch; readStoredVariant's
   // localStorage lookup only happens after mount, in the effect below.
   const [oliviaVariant, setOliviaVariantState] = useState<OliviaVariant>(fixedVariant ?? "panelIcons");
-  // Which of HomeGreeting's two current zero-state references shows in
-  // Olivia's own panel — same "owned on the page itself" reasoning as
-  // oliviaVariant above, but rendered unconditionally (not gated behind
-  // `!fixedVariant`) since ZeroStateSwitcher is meant to stay usable on
-  // the deployed prototype, not just the internal /explore comparison.
-  const [zeroStateVariant, setZeroStateVariant] = useState<ZeroStateVariant>("v1");
 
   useEffect(() => {
     // A locked-variant page (fixedVariant set) never reads or writes
@@ -436,7 +429,6 @@ export function OliviaDashboard({
                   <DashboardHeader siteName="Detroit, MI (DTW)" greeting="Good morning, it’s Friday, May 5" />
 
                   {!fixedVariant && <PrototypeSwitcher variant={oliviaVariant} onChange={setOliviaVariant} />}
-                  <ZeroStateSwitcher variant={zeroStateVariant} onChange={setZeroStateVariant} />
 
                   <div className={styles.stack}>
                     <PeopleSection clockedIn={clockedIn} />
@@ -473,7 +465,6 @@ export function OliviaDashboard({
             initialTopic={initialTopic}
             initialPageLabel={initialPageLabel}
             activePage={activePage}
-            zeroStateVariant={zeroStateVariant}
             onPresenterMinimizedChange={setIsPresenterMinimized}
           />
         )}
@@ -509,7 +500,6 @@ export function OliviaDashboard({
             onRequestOpen={() => setIsFabModalOpen(true)}
             session={fabSession}
             reportFlowVariant={reportFlowVariant}
-            zeroStateVariant={zeroStateVariant}
           />
         </>
       )}

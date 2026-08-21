@@ -15,7 +15,6 @@ import { PresenterMiniBar } from "./PresenterMiniBar";
 import { ReportGenerateModal } from "./ReportGenerateModal";
 import { ReportToast } from "./ReportToast";
 import { useOliviaSession } from "./useOliviaSession";
-import type { ZeroStateVariant } from "./ZeroStateSwitcher";
 import styles from "./OliviaPanel.module.css";
 
 /** "report" and "dashboard" are both kept in this union purely as mode
@@ -181,7 +180,6 @@ export function OliviaPanel({
   initialTopic = null,
   initialPageLabel,
   activePage = "home",
-  zeroStateVariant,
   onPresenterMinimizedChange,
 }: {
   isOpen: boolean;
@@ -220,11 +218,6 @@ export function OliviaPanel({
    * "Summarize page view" reads this (see useOliviaSession), to pick
    * which PAGE_SUMMARY_SECTIONS entry "the current view" means. */
   activePage?: "home" | "safety" | "communications" | "quality";
-  /** Which of HomeGreeting's two current zero-state references to show
-   * (see ZeroStateSwitcher) — owned by the caller (OliviaDashboard,
-   * rendered on the home page itself) same as `variant`/`onVariantChange`
-   * are, since it's a property of the whole prototype, not this panel. */
-  zeroStateVariant?: ZeroStateVariant;
   /** Fires whenever the mini presenter bar's own visibility would
    * change (panel closed while still on the presenter view) — lets
    * "fabPanel" (the only variant with a FAB of its own to worry about)
@@ -245,6 +238,32 @@ export function OliviaPanel({
     onPresenterMinimizedChange?.(isPresenterMinimized);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPresenterMinimized]);
+
+  /** Below 860px (see OliviaPanel.module.css's own @media block) the
+   * panel stops being a docked sliver the page stays visible beside —
+   * it takes over the whole viewport as its own full-screen page, with
+   * the real page hidden (not just obscured) underneath. Locking
+   * `document.body`'s own scroll while that's true keeps a touch
+   * scroll on the panel from bleeding through to move the hidden page
+   * behind it, the same reason any full-screen mobile takeover does
+   * this. Desktop deliberately keeps the page scrollable beside the
+   * panel (see .panelSlot's own doc comment) — this only locks it
+   * below the breakpoint, and only while open, and it re-checks on
+   * resize/rotation so crossing the breakpoint while open doesn't
+   * leave scroll stuck either way. */
+  useEffect(() => {
+    if (!isOpen) return;
+    const mql = window.matchMedia("(max-width: 860px)");
+    const applyLock = () => {
+      document.body.style.overflow = mql.matches ? "hidden" : "";
+    };
+    applyLock();
+    mql.addEventListener("change", applyLock);
+    return () => {
+      mql.removeEventListener("change", applyLock);
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
   /** The report toast (below) only hides itself WHILE the user is on
    * the Ask tab, chat flow, report ready — it doesn't otherwise know
@@ -457,7 +476,6 @@ export function OliviaPanel({
                     )
                   : undefined
               }
-              zeroStateVariant={zeroStateVariant}
               onViewLiveDashboardFullScreen={session.openLiveDashboardFullScreen}
               currentSummaryPageId={session.currentSummaryPageId}
               onSummarizePage={session.generatePageSummary}

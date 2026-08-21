@@ -15,7 +15,6 @@ import { LiveDashboardFullScreen } from "./LiveDashboardFullScreen";
 import { SiteDashboardFullScreen } from "./SiteDashboardFullScreen";
 import type { ReportFlowVariant } from "./OliviaPanel";
 import type { useOliviaSession } from "./useOliviaSession";
-import type { ZeroStateVariant } from "./ZeroStateSwitcher";
 import styles from "./OliviaFabModal.module.css";
 
 /** "Generate an Output" list — same three modes as the side panel's
@@ -98,7 +97,6 @@ export function OliviaFabModal({
   onRequestOpen,
   session,
   reportFlowVariant = "chat",
-  zeroStateVariant,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -112,8 +110,6 @@ export function OliviaFabModal({
    * (useOliviaSession's own second argument), since that's what
    * actually drives pickMode/openMode's behavior. */
   reportFlowVariant?: ReportFlowVariant;
-  /** Same as the identical prop on OliviaPanel — see ZeroStateSwitcher. */
-  zeroStateVariant?: ZeroStateVariant;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -277,7 +273,6 @@ export function OliviaFabModal({
                 onPickPrompt={(t, q) => session.askTopic(t, q)}
               />
             )}
-            zeroStateVariant={zeroStateVariant}
             onViewLiveDashboardFullScreen={session.openLiveDashboardFullScreen}
             currentSummaryPageId={session.currentSummaryPageId}
             onSummarizePage={session.generatePageSummary}
