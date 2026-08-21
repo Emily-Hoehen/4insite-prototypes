@@ -25,7 +25,10 @@
    it, the same "always reachable" behavior the old `position: fixed`
    gave for free. No backdrop any more — the page stays fully visible
    and interactive next to the panel, so there's nothing to dim or
-   click through to dismiss; closing is explicit (X / Escape) only. */
+   click through to dismiss; closing is explicit (X / Escape) only.
+   Below 860px this whole "docked, pushes the page" design is
+   overridden by a full-screen takeover instead — see the
+   @media (max-width: 860px) block further down. */
 .panelSlot {
   position: sticky;
   top: 0;
@@ -62,6 +65,71 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .panelSlot {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* ---------------- Mobile: full-screen page, not a docked panel ----------------
+   860px matches the compact breakpoint already used elsewhere in this
+   app (ExternalPresenterView, ServiceHistoryModal's own sidebar) —
+   reused here rather than picking a new number, so "narrow viewport"
+   means the same thing everywhere. Below it, the desktop "panel
+   pushes the page, page stays visible and interactive beside it"
+   design (see .panelSlot's own doc comment above) stops making sense:
+   there's no spare width to push into, and a 440px-wide sliver
+   docked against a 1440px canvas would just force horizontal
+   scrolling. Olivia instead takes over the whole viewport as her own
+   page — `position: fixed` lifts .panelSlot out of .appShell's flex
+   row entirely, so .pageColumn stops reserving space for it and sits
+   at its normal (desktop-canvas) width underneath, fully hidden by
+   the opaque takeover on top rather than squeezed. The reveal
+   direction stays the same "slides in from the right" as desktop,
+   just via `transform` (a full-width layer sliding into view) instead
+   of desktop's `width` (a sliver growing wider) — animating `width`
+   at 100vw would also fight `position: fixed`, which doesn't
+   participate in layout for its containing block to grow into.
+   useOliviaSession's own state is untouched — this is a presentation
+   change only, not a different flow. See OliviaPanel.tsx's own
+   scroll-lock effect for the other half of "feels like its own page":
+   the hidden page behind can't be scrolled by touch bleeding through
+   while this is up. */
+@media (max-width: 860px) {
+  .panelSlot {
+    position: fixed;
+    inset: 0;
+    z-index: 62;
+    width: 100%;
+    height: 100dvh;
+    transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(100%);
+  }
+
+  .panelSlotOpen {
+    width: 100%;
+    transform: translateX(0);
+  }
+
+  .panel {
+    width: 100%;
+    height: 100dvh;
+    border-left: none;
+    box-shadow: none;
+  }
+
+  /* iOS/Android inset-aware chrome — a real full-screen page owns its
+     own safe areas (notch, home-indicator strip) the way the docked
+     desktop panel never had to. Additive to the existing padding, not
+     a replacement for it, so the touch targets inside keep their own
+     spacing from the actual notch/gesture-bar edge rather than
+     hugging it. `env()` resolves to 0 on devices without a cutout, so
+     this is a no-op there. */
+  .header {
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
+}
+
+@media (max-width: 860px) and (prefers-reduced-motion: reduce) {
   .panelSlot {
     transition-duration: 0.01ms;
   }

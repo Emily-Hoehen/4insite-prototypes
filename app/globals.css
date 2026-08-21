@@ -255,6 +255,22 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  /* This app's own dashboard canvas is a deliberately fixed 1440px
+     design (see OliviaDashboard.module.css's .page) that a narrower
+     viewport is meant to horizontally scroll via .pageScroll's own
+     containment — but Nav sits outside that scroller (see its own
+     doc comment on why) and doesn't wrap or scroll on its own, so its
+     row of links/icons can still overflow the document at narrow
+     widths. Without this, that overflow doesn't just add a page-wide
+     scrollbar — on mobile browsers it inflates the *layout viewport*
+     itself (the box `position: fixed` percentage/vw sizing resolves
+     against), so a `width: 100%` full-screen element elsewhere on the
+     page — Olivia's own mobile takeover included, see OliviaPanel.
+     module.css — silently renders wider than the visual viewport
+     instead of edge-to-edge. Clipping it here is a base-level, one-
+     line safety net for that whole class of bug, not a fix for Nav's
+     own (separately out of scope) mobile layout. */
+  overflow-x: hidden;
 }
 
 body {
@@ -262,6 +278,7 @@ body {
   color: var(--color-text-dt-default);
   font-family: var(--font-family-ui);
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {

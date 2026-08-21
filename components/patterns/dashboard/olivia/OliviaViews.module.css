@@ -115,14 +115,14 @@
   text-align: center;
 }
 
-/* ---------------- Home greeting, row hero (Figma node 2255:45851,
+/* ---------------- Home greeting, row hero (Figma node 2281:20356,
    "Zero State") ----------------
-   HomeGreeting's own hero, updated to match: avatar and greeting sit
-   side by side (not stacked/centered) at a smaller 70px avatar size,
-   left-aligned. PanelContextGreeting keeps the stacked
-   .homeGreetingHero/.homeGreetingText treatment above — this is a
-   separate pair of classes rather than a modifier on those, so the
-   two greetings can't drift into each other by accident. */
+   HomeGreeting's own hero: avatar and greeting sit side by side (not
+   stacked/centered) at a smaller 70px avatar size, left-aligned.
+   PanelContextGreeting keeps the stacked .homeGreetingHero/
+   .homeGreetingText treatment above — this is a separate pair of
+   classes rather than a modifier on those, so the two greetings can't
+   drift into each other by accident. */
 .homeGreetingHeroRow {
   display: flex;
   flex-direction: row;
@@ -154,144 +154,6 @@
 /* The old single "For you" list (home greeting) has been replaced by
    the shared two-section OutputsAndPerformanceLists component (Figma
    node 2123:2012) — see OutputsAndPerformanceLists.module.css. */
-
-/* ---------------- Home greeting, centered hero (Figma node
-   2297:22894 "Zero State 3", née "Zero State 4" before the old
-   "Zero State 3" reference was dropped and this one renumbered down
-   to take its place) ----------------
-   Stacked/centered like .homeGreetingHero, but a bigger 101px avatar,
-   a tighter 16px gap, and Headers/H2 20px text (matching
-   .homeGreetingTextRow's own sizing) instead of .homeGreetingHero's
-   24px gap + H1 22px — a third, separate pair of classes for the same
-   reason .homeGreetingHeroRow is its own pair rather than a modifier:
-   none of these three hero treatments should be able to drift into
-   each other by accident. */
-.homeGreetingHeroCentered {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
-  text-align: center;
-}
-
-.homeGreetingHeroCentered .greetingHeadline {
-  text-align: center;
-  font-family: var(--type-h2-family);
-  font-size: 20px;
-  font-weight: 900;
-  line-height: 1.3;
-}
-
-/* "v3" only — Figma's own outer group splits into two children
-   instead of .homeGreeting's single centered stack: a flex: 1 inner
-   group (hero, site-level cards, suggested prompts — still centered
-   exactly like .homeGreeting itself) and a second, natural-height
-   sibling pinned below it (the page-level insights row, scrolling
-   horizontally — see .pillRowScroll). The inner group's own flex: 1
-   is what actually pins the second sibling to the bottom; this class
-   only needs to stop .homeGreeting's own justify-content: center from
-   centering the *pair* of them instead of letting the first one fill
-   the space. */
-.homeGreetingSplit {
-  justify-content: flex-start;
-}
-
-.homeGreetingCenterGroup {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 40px;
-  width: 100%;
-}
-
-/* .pillRowScroll — a horizontally-scrolling page-level insights row,
-   no vertical stack + section header the way every other variant's
-   page-level section has one. Used two places now: "v3"'s own zero
-   state (pinned below .homeGreetingCenterGroup) and AskView's
-   post-reply suggested-prompts row (a sibling of .log/.chatCardFooter
-   there, always visible above the composer regardless of scroll
-   position — see AskView's own comment on why that one moved out of
-   .log entirely to get this same treatment). The border/padding-top
-   read as this row joining the composer as one footer unit below it,
-   per Figma node 2297:22894's own reference — separate from whatever
-   scrollable content sits above. Same thin-scrollbar treatment as
-   OliviaPanel.module.css's own .body, adapted for a horizontal track. */
-.pillRowScroll {
-  display: flex;
-  gap: 12px;
-  width: 100%;
-  padding-top: 16px;
-  padding-bottom: 8px;
-  border-top: 1px solid var(--color-neutral-700);
-  overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-neutral-600) transparent;
-}
-
-.pillRowScroll > * {
-  flex-shrink: 0;
-}
-
-.pillRowScroll::-webkit-scrollbar {
-  height: 8px;
-}
-
-.pillRowScroll::-webkit-scrollbar-thumb {
-  background-color: var(--color-neutral-600);
-  border-radius: 8px;
-}
-
-.pillRowScroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-/* "v3"'s own zero-state usage specifically — nested inside .log
-   (unlike AskView's sibling usage below), so its border/content sit
-   inset by .log's own 16px horizontal padding by default; negative
-   left/right margins break the *border* out to the card's true full
-   width while padding of the same amount keeps the *content* (the
-   pills) visually aligned with everything else in the panel. The
-   negative bottom margin reaches through .log's own 24px
-   padding-bottom, .chatCardFooter's 20px padding-top, and .composer's
-   own 4px padding-top (the actual <input> sits inside that, one layer
-   further in than .chatCardFooter itself) the same way
-   .previewImageButtonFullBleed/the old .suggestedFooter did — see
-   either of those for the general technique. -38.5px is tuned by
-   measurement (rendered gap, not just the nominal paddings summed by
-   hand) to land the visible gap above the composer at exactly 16px,
-   per the user's own request, instead of the ~52px all those paddings
-   would otherwise stack up to. */
-.pillRowScrollFullBleed {
-  composes: pillRowScroll;
-  /* .pillRowScroll's own width: 100% is fixed relative to its
-     containing block (.log's content box) — negative margins alone
-     shift a 100%-wide box left without growing it, so the border
-     would just move 16px left instead of reaching the card's true
-     right edge too. calc() grows the box itself by the same 32px the
-     margins pull it out by, so both edges actually land flush with
-     .chatCard's own edges. */
-  width: calc(100% + 32px);
-  margin: 0 -16px -38.5px;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-bottom: 0;
-}
-
-/* AskView's own usage — a direct sibling of .log/.chatCardFooter
-   within .chatCard (which has no padding of its own; every child
-   supplies its own, same as .chatCardFooter's own 16px), not nested
-   inside .log the way the zero state's copy of this row is — that one
-   already sits inside .log's own 16px horizontal padding, so adding
-   it again here would double it. */
-.pillRowScrollPadded {
-  composes: pillRowScroll;
-  padding-left: 16px;
-  padding-right: 16px;
-}
 
 /* ---------------- Topic-focused greeting (contextual entry) ---------------- */
 
@@ -372,14 +234,10 @@
 }
 
 /* The scroll container. Holds one child on the zero-state branch (the
-   greeting) or with ZeroStateVariant "v3" (.logMessages alone — "v3"'s
-   own suggested-prompts row lives outside .log entirely instead, as a
-   .chatCard-level sibling — see .pillRowScrollPadded's own comment
-   near .chatCardFooter below). "v1"/"v2" still get two: .logMessages
-   plus .suggestedFooter, back to its original bottom-pinned behavior
-   (see that class's own comment) — gap is the FLOOR of the space
-   between those two specifically; harmless when there's only the one
-   child. */
+   greeting), or two once a conversation starts: .logMessages plus
+   .suggestedFooter (see that class's own comment) — gap is the FLOOR
+   of the space between those two specifically; harmless when there's
+   only the one child. */
 .log {
   flex: 1;
   min-height: 0;
@@ -413,6 +271,18 @@
 
 .chatCardFooter .composer {
   margin: 0;
+}
+
+/* Mobile full-screen takeover only (see OliviaPanel.module.css's own
+   @media (max-width: 860px) block) — the composer sits flush against
+   the real bottom of the device there (a home-indicator gesture bar
+   on iOS), unlike the docked desktop panel; additive to the existing
+   20px so the input keeps its own breathing room from the cutout
+   rather than hugging it. `env()` resolves to 0 without one. */
+@media (max-width: 860px) {
+  .chatCardFooter {
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
 }
 
 .bubbleRow {
@@ -599,14 +469,10 @@
   }
 }
 
-/* AskView's post-reply suggested-prompts row, ZeroStateVariant "v1"/
-   "v2" only — back to its original behavior per the user's own
-   request: a sibling of .logMessages within .log (not the pinned,
-   horizontally-scrolling .pillRowScrollPadded sibling of .log itself
-   that "v3" gets instead — see AskView's own comment on that split),
-   so it scrolls away with the rest of the conversation rather than
-   staying stuck once there's more content than fits, left-aligned and
-   stacked one per row via .pillList.
+/* AskView's post-reply suggested-prompts row — a sibling of
+   .logMessages within .log, so it scrolls away with the rest of the
+   conversation rather than staying stuck once there's more content
+   than fits, left-aligned and stacked one per row via .pillList.
 
    margin-top: auto is the flexbox trick for bottom-pinning a child
    inside a column flex container: it consumes whatever room is left
@@ -984,6 +850,15 @@
   gap: 24px;
   padding: 12px 16px 24px;
   overflow-y: auto;
+}
+
+/* Same reasoning as .chatCardFooter's own mobile rule above — the
+   transport controls sit at the real bottom edge of the device on the
+   full-screen takeover, not a docked panel floating above it. */
+@media (max-width: 860px) {
+  .presenterBody {
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
 }
 
 .presenterStage {
