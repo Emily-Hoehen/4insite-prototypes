@@ -329,3 +329,10 @@ export function BriefcaseMedicalIcon({ className }: IconProps) {
 export function FileChartIcon({ className }: IconProps) {
   return fa("solid", "file-chart-column", className);
 }
+
+/** "Site Scorecards" personalized suggestion — confirmed against Figma's
+ * own export (node 2360:30996's ligature fell back to literal glyph
+ * text: "trophy-alt"). */
+export function TrophyIcon({ className }: IconProps) {
+  return fa("solid", "trophy-alt", className);
+}

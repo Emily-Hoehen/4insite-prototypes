@@ -281,6 +281,29 @@
   pointer-events: none;
 }
 
+/* Same spot/purple as .oliviaNotificationDot, just sized to carry a
+   count instead of standing in for one — how many personalized
+   suggestions are waiting (see PERSONALIZED_SUGGESTIONS), a "ping"
+   that's more specific than the plain dot's "something's ready". */
+.oliviaNotificationBadge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 100px;
+  background-color: var(--color-datavis-purple-100);
+  border: 2px solid var(--color-neutral-900);
+  color: var(--color-text-dt-default-inverted);
+  font-family: var(--type-h4-family);
+  font-size: 10px;
+  font-weight: var(--type-h4-weight);
+  line-height: 12px;
+  text-align: center;
+  pointer-events: none;
+}
+
 /* A brief expanding ring, on top of the static dot, so a fresh summary
    is hard to miss on first paint rather than relying on the dot alone. */
 .oliviaPulse::before {

@@ -6,6 +6,7 @@ import {
   OfflineReportFeature,
   OliviaScope,
   OliviaTopic,
+  PersonalizedSuggestion,
   ServiceAnalysis,
   SummaryPageId,
   TOPIC_LABEL,
@@ -112,6 +113,7 @@ export function AskView({
   onSend,
   onSelectPrompt,
   onOpenMode,
+  onPickSuggestion,
   renderZeroState,
   onViewLiveDashboardFullScreen,
   currentSummaryPageId = "home",
@@ -149,6 +151,12 @@ export function AskView({
    * other caller (follow-up pills, the Tools menu), which don't ask a
    * scope question of their own. */
   onOpenMode: (mode: Exclude<OliviaView, "ask">, topic: OliviaTopic | null, scope?: OliviaScope) => void;
+  /** The default HomeGreeting zero-state's own PersonalizedSuggestions
+   * row — unused when `renderZeroState` supplies its own screen
+   * instead (that screen wires the same handler into its own
+   * PersonalizedSuggestions call directly; see PanelContextGreeting/
+   * OliviaFabModal). */
+  onPickSuggestion?: (suggestion: PersonalizedSuggestion) => void;
   /** Replaces the default HomeGreeting zero-state entirely — the FAB
    * modal's own "Generate an Output" / "Site Performance" grouped
    * greeting (Figma node 2085:1498) uses this to reuse AskView's
@@ -279,6 +287,8 @@ export function AskView({
                 onPickTopic={onSelectPrompt}
                 onOpenMode={(mode, scope) => onOpenMode(mode, currentTopic, scope)}
                 onSummarizePage={onSummarizePage}
+                onPickSuggestion={onPickSuggestion}
+                showPersonalizedSuggestions={entryContext.kind === "home"}
                 promptSet={entryContext.kind === "topic" ? TOPIC_SUGGESTED_PROMPTS[entryContext.topic] : undefined}
                 performanceLabel={
                   pageTopic === "safety"

@@ -76,6 +76,12 @@ export type NavProps = {
    * Bell's red notificationDot so it reads as "Olivia has something for
    * you" rather than an alert. */
   oliviaHasNotification?: boolean;
+  /** When set (>0), the dot above becomes a numbered badge instead —
+   * e.g. how many personalized suggestions are waiting in Olivia's zero
+   * state (see PERSONALIZED_SUGGESTIONS). Still gated on
+   * `oliviaHasNotification` for the pulse ring/aria-label; this only
+   * decides dot vs. count once that's true. */
+  oliviaNotificationCount?: number;
 
   utilityItems?: NavUtilityItem[];
 
@@ -106,6 +112,7 @@ export function Nav({
   onOliviaClick,
   showOlivia = true,
   oliviaHasNotification = false,
+  oliviaNotificationCount,
   utilityItems = [],
   avatarSrc,
   avatarAlt = "Account",
@@ -197,15 +204,26 @@ export function Nav({
                     type="button"
                     className={styles.olivia}
                     onClick={onOliviaClick}
-                    aria-label={oliviaHasNotification ? "Ask Olivia — new summary ready" : "Ask Olivia"}
+                    aria-label={
+                      oliviaHasNotification
+                        ? oliviaNotificationCount
+                          ? `Ask Olivia — ${oliviaNotificationCount} new suggestions ready`
+                          : "Ask Olivia — new summary ready"
+                        : "Ask Olivia"
+                    }
                   >
                     {oliviaImageSrc && (
                       <img src={oliviaImageSrc} alt="" className={styles.oliviaImage} />
                     )}
                   </button>
-                  {oliviaHasNotification && (
-                    <span className={styles.oliviaNotificationDot} aria-hidden="true" />
-                  )}
+                  {oliviaHasNotification &&
+                    (oliviaNotificationCount ? (
+                      <span className={styles.oliviaNotificationBadge} aria-hidden="true">
+                        {oliviaNotificationCount}
+                      </span>
+                    ) : (
+                      <span className={styles.oliviaNotificationDot} aria-hidden="true" />
+                    ))}
                 </span>
               ) : (
                 <div className={styles.olivia} aria-hidden="true" />

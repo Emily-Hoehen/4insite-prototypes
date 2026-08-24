@@ -10,6 +10,21 @@
   width: 100%;
 }
 
+/* HomeGreeting-only overrides (Figma node 2279:16662's own 48px base
+   gap, tightened to 32px once Personalized Suggestions is showing —
+   node 2360:30996). PanelContextGreeting keeps this class's own plain
+   40px, unmodified. Both must come after .listsGroup in this file so
+   their gap wins at equal specificity regardless of prop/className
+   order in HomeGreeting.tsx (same ordering rule as
+   .composerExpandedJoined's own doc comment, OliviaViews.module.css). */
+.listsGroupWide {
+  gap: 48px;
+}
+
+.listsGroupTight {
+  gap: 32px;
+}
+
 .section {
   display: flex;
   flex-direction: column;
@@ -136,9 +151,12 @@
      lets a flex child shrink below its own content's natural width;
      shrink: 0 would ignore that floor and overflow the row instead. */
   flex: 1 1 0;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
+  /* Icon-left, label-right (per the user's own reference) — was a
+     centered column (icon over label) before; the icon now sits beside
+     the two-line label instead of above it, vertically centered against
+     it. */
+  flex-direction: row;
+  align-items: center;
   gap: 12px;
   min-width: 0;
   padding: 20px 12px;
@@ -169,36 +187,48 @@
   line-height: 1;
 }
 
-/* Each site-level card gets its own icon-well color per Figma node
-   2281:20356 — Offline Report teal, Site Presentation yellow-orange,
-   Live Site Dashboard red-orange (the same red-orange as the
-   page-level "View live dashboard of page" pill below). An earlier
-   reference (2255:45851) briefly gave each card its own accent this
-   same way before a run of later ones went back to one uniform purple
-   tint for all three; this is that per-card treatment again. */
-.outputIconTeal {
-  composes: outputIcon;
-  background-color: rgba(128, 255, 231, 0.15);
+/* Each site-level card gets its own icon color per Figma node
+   2279:16662's latest pull — Offline Report teal, Site Presentation
+   yellow-orange, same two accents as before (see git history for the
+   earlier tinted-well version, node 2281:20356/2255:45851) but as a
+   plain 24px icon with no background well behind it — one less visual
+   layer competing with the card's own border. */
+.outputIconPlain {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.outputIconPlain i,
+.outputIconPlain svg {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.outputIconTealPlain {
+  composes: outputIconPlain;
   color: var(--color-datavis-teal-100);
 }
 
-.outputIconYellowOrange {
-  composes: outputIcon;
-  background-color: rgba(255, 201, 128, 0.15);
+.outputIconYellowOrangePlain {
+  composes: outputIconPlain;
   color: var(--color-datavis-yellow-orange-100);
 }
 
-.outputIconRedOrange {
-  composes: outputIcon;
-  background-color: rgba(255, 138, 128, 0.15);
-  color: var(--color-datavis-red-orange-100);
-}
-
-/* .outputCard's own label — left-aligned, stacked *under* its icon,
-   matching that card's own items: flex-start. */
+/* .outputCard's own label — sits beside its icon now (row layout, see
+   .outputCard), not stacked under it — flex: 1 (not width: 100%, which
+   only worked back when this was a plain flow child of a column;
+   .outputCard's row layout blockifies this into a flex item, where a
+   literal 100% would measure against the row's own content box and
+   overflow past the icon) with min-width: 0 so its own two-line text
+   can still wrap/shrink inside the card instead of pushing it wider. */
 .outputCardLabel {
   margin: 0;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   color: var(--color-text-dt-default);
   font-family: var(--type-h4-family);
   font-size: 14px;

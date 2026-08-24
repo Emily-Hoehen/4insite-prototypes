@@ -24,7 +24,7 @@ import { QualityMegaMenu } from "./QualityMegaMenu";
 import { CommunicationCenterFullScreen } from "./CommunicationCenterFullScreen";
 import { OliviaPanel } from "./olivia/OliviaPanel";
 import type { OliviaOpenRequest, OliviaVariant, ReportFlowVariant } from "./olivia/OliviaPanel";
-import { QUALITY_PAGE_SUMMARY, type OliviaTopic, type ServiceAnalysis } from "./olivia/oliviaContent";
+import { PERSONALIZED_SUGGESTIONS, QUALITY_PAGE_SUMMARY, type OliviaTopic, type ServiceAnalysis } from "./olivia/oliviaContent";
 import { useOliviaSession } from "./olivia/useOliviaSession";
 import { CommunicationCenterPanel } from "./olivia/CommunicationCenterPanel";
 import type { CommCenterOpenRequest } from "./olivia/CommunicationCenterPanel";
@@ -204,6 +204,15 @@ export function OliviaDashboard({
     previousActivePageRef.current = activePage;
   }, [activePage]);
 
+  // The zero state's own "Here are your suggestions" ping (see
+  // PersonalizedSuggestions/PERSONALIZED_SUGGESTIONS) — unlike
+  // hasUnseenQualitySummary, this isn't tied to any one page: it's
+  // Olivia flagging she has proactive picks ready, cleared the first
+  // time any entry point (nav avatar, FAB) is opened this session, same
+  // "seen it" moment as Quality's own flag just clears independently
+  // of it.
+  const [hasUnseenSuggestions, setHasUnseenSuggestions] = useState(true);
+
   // Global entry point — the navbar avatar (panelIcons/panelContext
   // only; see showNavOliviaAvatar). No specific card in context, so
   // Olivia opens on her general "Welcome back" greeting — except the
@@ -214,6 +223,7 @@ export function OliviaDashboard({
   const openOlivia = (event: React.MouseEvent<HTMLButtonElement>) => {
     oliviaTriggerRef.current = event.currentTarget;
     setIsOliviaOpen(true);
+    setHasUnseenSuggestions(false);
     if (hasUnseenQualitySummary) {
       setHasUnseenQualitySummary(false);
       setOpenRequest({ kind: "home", requestId: Date.now(), pageSummary: QUALITY_PAGE_SUMMARY });
@@ -229,6 +239,7 @@ export function OliviaDashboard({
   const toggleFabModal = () => {
     const opening = !isFabModalOpen;
     setIsFabModalOpen(opening);
+    if (opening) setHasUnseenSuggestions(false);
     if (opening && hasUnseenQualitySummary) {
       setHasUnseenQualitySummary(false);
       fabSession.showPageSummary(QUALITY_PAGE_SUMMARY, "qualitySummary");
@@ -247,6 +258,7 @@ export function OliviaDashboard({
    * just without a MouseEvent to capture focus-return from. */
   const openOliviaViaFab = () => {
     setIsOliviaOpen(true);
+    setHasUnseenSuggestions(false);
     if (hasUnseenQualitySummary) {
       setHasUnseenQualitySummary(false);
       setOpenRequest({ kind: "home", requestId: Date.now(), pageSummary: QUALITY_PAGE_SUMMARY });
@@ -372,7 +384,8 @@ export function OliviaDashboard({
             showOlivia={showNavOliviaAvatar}
             onOliviaClick={showNavOliviaAvatar ? openOlivia : undefined}
             oliviaImageSrc={showNavOliviaAvatar ? "/dashboard/Olivia Avatar.png" : undefined}
-            oliviaHasNotification={showNavOliviaAvatar && hasUnseenQualitySummary}
+            oliviaHasNotification={showNavOliviaAvatar && (hasUnseenQualitySummary || hasUnseenSuggestions)}
+            oliviaNotificationCount={showNavOliviaAvatar && hasUnseenSuggestions ? PERSONALIZED_SUGGESTIONS.length : undefined}
             utilityItems={[
               { icon: <StoreIcon />, label: "Store" },
               { icon: <PlusIcon />, label: "Quick entries" },
@@ -492,7 +505,8 @@ export function OliviaDashboard({
           <OliviaFab
             onClick={toggleFabModal}
             isOpen={isFabModalOpen}
-            hasNotification={hasUnseenQualitySummary}
+            hasNotification={hasUnseenQualitySummary || hasUnseenSuggestions}
+            notificationCount={hasUnseenSuggestions ? PERSONALIZED_SUGGESTIONS.length : undefined}
           />
           <OliviaFabModal
             isOpen={isFabModalOpen}
@@ -511,7 +525,12 @@ export function OliviaDashboard({
           presenter bar is up (see isPresenterMinimized) — it already
           offers its own way back into the panel, at this exact spot. */}
       {oliviaVariant === "fabPanel" && !isOliviaOpen && !isPresenterMinimized && (
-        <OliviaFab onClick={openOliviaViaFab} isOpen={isOliviaOpen} hasNotification={hasUnseenQualitySummary} />
+        <OliviaFab
+          onClick={openOliviaViaFab}
+          isOpen={isOliviaOpen}
+          hasNotification={hasUnseenQualitySummary || hasUnseenSuggestions}
+          notificationCount={hasUnseenSuggestions ? PERSONALIZED_SUGGESTIONS.length : undefined}
+        />
       )}
     </>
   );
