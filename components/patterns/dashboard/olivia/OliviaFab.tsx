@@ -15,6 +15,7 @@ export function OliviaFab({
   onClick,
   isOpen,
   hasNotification = false,
+  notificationCount,
 }: {
   onClick: () => void;
   isOpen: boolean;
@@ -22,6 +23,11 @@ export function OliviaFab({
    * summary) — same purple dot + pulse ring treatment as the nav
    * avatar's oliviaHasNotification (see Nav.tsx). */
   hasNotification?: boolean;
+  /** When set (>0), shows a numbered badge instead of the plain dot —
+   * e.g. how many personalized suggestions are waiting in the zero
+   * state (see PERSONALIZED_SUGGESTIONS) — same "dot vs. count" split
+   * as Nav's own oliviaNotificationCount. */
+  notificationCount?: number;
 }) {
   return (
     <span className={[styles.wrap, hasNotification ? styles.pulse : ""].filter(Boolean).join(" ")}>
@@ -29,13 +35,28 @@ export function OliviaFab({
         type="button"
         className={styles.fab}
         onClick={onClick}
-        aria-label={isOpen ? "Close Olivia" : hasNotification ? "Open Olivia — new summary ready" : "Open Olivia"}
+        aria-label={
+          isOpen
+            ? "Close Olivia"
+            : hasNotification
+            ? notificationCount
+              ? `Open Olivia — ${notificationCount} new suggestions ready`
+              : "Open Olivia — new summary ready"
+            : "Open Olivia"
+        }
         aria-haspopup="dialog"
         aria-expanded={isOpen}
       >
         <OliviaAvatar size={56} alt="Olivia" />
       </button>
-      {hasNotification && <span className={styles.notificationDot} aria-hidden="true" />}
+      {hasNotification &&
+        (notificationCount ? (
+          <span className={styles.notificationBadge} aria-hidden="true">
+            {notificationCount}
+          </span>
+        ) : (
+          <span className={styles.notificationDot} aria-hidden="true" />
+        ))}
     </span>
   );
 }

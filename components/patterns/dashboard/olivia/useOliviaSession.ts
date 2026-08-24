@@ -9,6 +9,7 @@ import {
   OliviaScope,
   OliviaTopic,
   PAGE_SUMMARY_SECTIONS,
+  PersonalizedSuggestion,
   PRESENTER_INTRO_SLIDE,
   presenterNarration,
   reportPageUrl,
@@ -265,6 +266,22 @@ export function useOliviaSession(
 
   const askTopic = (t: OliviaTopic, questionText?: string) => {
     sendMessage(questionText ?? promptTextFor(t), t);
+  };
+
+  /** A personalized suggestion (see PERSONALIZED_SUGGESTIONS) being
+   * picked from the zero state — same echo-then-reply shape as
+   * sendMessage, but answers with that suggestion's own canned `reply`
+   * directly instead of routing the question through matchTopic (these
+   * aren't phrased to match any of safety/complaint/audit's keywords,
+   * and don't carry a topic of their own). */
+  const askPersonalizedSuggestion = (suggestion: PersonalizedSuggestion) => {
+    if (isThinking) return;
+    setMessages((prev) => [...prev, { id: nextMessageId(), role: "user", text: suggestion.question }]);
+    setIsThinking(true);
+    window.setTimeout(() => {
+      setMessages((prev) => [...prev, { id: nextMessageId(), role: "olivia", text: suggestion.reply }]);
+      setIsThinking(false);
+    }, THINKING_DELAY_MS);
   };
 
   /** A mode menu's choice — sets scope AND switches to that mode in one
@@ -734,6 +751,7 @@ export function useOliviaSession(
     reopenReport,
     sendMessage,
     askTopic,
+    askPersonalizedSuggestion,
     pickMode,
     openMode,
     resetToHome,

@@ -1,9 +1,10 @@
 "use client";
 
-import type { OliviaScope, OliviaTopic, SuggestedPrompt } from "./oliviaContent";
+import type { OliviaScope, OliviaTopic, PersonalizedSuggestion, SuggestedPrompt } from "./oliviaContent";
 import type { OliviaView } from "./OliviaPanel";
 import { OliviaAvatar } from "./OliviaAvatar";
 import { OutputsAndPerformanceLists } from "./OutputsAndPerformanceLists";
+import { PersonalizedSuggestions } from "./PersonalizedSuggestions";
 import styles from "./OliviaViews.module.css";
 
 /**
@@ -18,6 +19,7 @@ import styles from "./OliviaViews.module.css";
 export function PanelContextGreeting({
   onPickTopic,
   onOpenMode,
+  onPickSuggestion,
   promptSet,
   performanceLabel,
 }: {
@@ -26,6 +28,9 @@ export function PanelContextGreeting({
    * the row itself (see OutputsAndPerformanceLists' scope menu) — the
    * chosen scope comes back here alongside the mode. */
   onOpenMode: (mode: Exclude<OliviaView, "ask">, scope: OliviaScope) => void;
+  /** Picking one of PersonalizedSuggestions' own rows — see
+   * useOliviaSession's askPersonalizedSuggestion. */
+  onPickSuggestion?: (suggestion: PersonalizedSuggestion) => void;
   promptSet?: SuggestedPrompt[];
   performanceLabel?: string;
 }) {
@@ -38,6 +43,8 @@ export function PanelContextGreeting({
           <p className={styles.greetingHeadline}>Hi Emily, how can I help you today?</p>
         </div>
       </div>
+
+      <PersonalizedSuggestions onPick={onPickSuggestion} />
 
       <OutputsAndPerformanceLists
         order="performanceFirst"

@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { BullhornIcon, CloseIcon, FinancialsIcon, MoreIcon, PdfIcon, RotateLeftIcon } from "../../icons";
-import { SUGGESTED_PROMPTS, TOPIC_SWATCH, type OliviaTopic } from "./oliviaContent";
+import { PersonalizedSuggestion, SUGGESTED_PROMPTS, TOPIC_SWATCH, type OliviaTopic } from "./oliviaContent";
 import type { OliviaView } from "./OliviaPanel";
 import { OliviaAvatar } from "./OliviaAvatar";
+import { PersonalizedSuggestions } from "./PersonalizedSuggestions";
 import { TopicIcon } from "./TopicIcon";
 import { AskView } from "./AskView";
 import { ExternalPresenterView } from "./ExternalPresenterView";
@@ -31,9 +32,11 @@ const OUTPUT_MODES: { id: Exclude<OliviaView, "ask">; label: string; icon: React
 function FabGreeting({
   onPickMode,
   onPickPrompt,
+  onPickSuggestion,
 }: {
   onPickMode: (mode: Exclude<OliviaView, "ask">) => void;
   onPickPrompt: (topic: OliviaTopic, question: string) => void;
+  onPickSuggestion?: (suggestion: PersonalizedSuggestion) => void;
 }) {
   return (
     <div className={styles.greeting}>
@@ -43,6 +46,8 @@ function FabGreeting({
           <p className={styles.greetingSub}>Ask me any question, or start with a prompt below.</p>
         </div>
       </div>
+
+      <PersonalizedSuggestions onPick={onPickSuggestion} />
 
       <div className={styles.section}>
         <p className={styles.sectionLabel}>Generate an output</p>
@@ -271,6 +276,7 @@ export function OliviaFabModal({
               <FabGreeting
                 onPickMode={(mode) => session.openMode(mode, topic)}
                 onPickPrompt={(t, q) => session.askTopic(t, q)}
+                onPickSuggestion={session.askPersonalizedSuggestion}
               />
             )}
             onViewLiveDashboardFullScreen={session.openLiveDashboardFullScreen}

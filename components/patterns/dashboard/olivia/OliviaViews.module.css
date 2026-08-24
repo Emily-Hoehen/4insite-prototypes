@@ -82,12 +82,18 @@
   text-align: center;
 }
 
-/* HomeGreeting's own row-hero variant (Figma node 2294:21839) tightened
-   this gap to 40px — scoped to a second class rather than editing
-   .homeGreeting directly, since PanelContextGreeting still uses that
-   shared class's own 48px for its own stacked hero. */
-.homeGreetingGap40 {
-  gap: 40px;
+/* HomeGreeting's own row-hero variant (Figma node 2279:16662) shares
+   .homeGreeting's own 48px hero-to-lists gap normally — this only
+   tightens it to 32px once Personalized Suggestions is showing (Figma
+   node 2360:30996), which also tightens OutputsAndPerformanceLists'
+   own .listsGroup the same amount (see that file's own
+   .listsGroupTight) — less room, more content, so both gaps shrink
+   together rather than just one. Scoped to a second class rather than
+   editing .homeGreeting directly, since PanelContextGreeting still
+   uses that shared class's own 48px unconditionally for its own
+   stacked hero. */
+.homeGreetingGapTight {
+  gap: 32px;
 }
 
 .homeGreetingHero {

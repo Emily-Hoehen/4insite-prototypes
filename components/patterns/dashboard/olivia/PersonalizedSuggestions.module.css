@@ -1,0 +1,79 @@
+/* "Personalized Suggestions" (Figma node 2360:30996, latest pull) — a
+   sparkle + label row, then one flat purple-tinted card per suggestion
+   (an icon beside its full question, single row — an earlier pass
+   stacked a category title over the question instead; see git
+   history). The header-to-list gap stays the parent .section's own
+   16px; .cardList tightens the gap *between* cards specifically to
+   12px, narrower than every other section's uniform 16px in this
+   file. */
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* White, not purple — per the user's own request; every other Olivia-
+   branded icon/label in this file stays purple (see the header
+   comment on OliviaViews.module.css for why purple usually means "this
+   came from Olivia"), but this sparkle is the one deliberate
+   exception. */
+.headIcon {
+  font-size: 14px;
+  line-height: 1;
+  color: var(--color-text-dt-default);
+}
+
+.cardList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Same flat purple tint as OutputsAndPerformanceLists' own
+   .promptPill (rgba(175, 153, 255, 0.15)) — icon-left, question-right,
+   one row, vertically centered. */
+.card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: rgba(175, 153, 255, 0.15);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.card:hover {
+  background-color: rgba(175, 153, 255, 0.25);
+}
+
+.cardIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: var(--color-datavis-purple-100);
+}
+
+.cardIcon i,
+.cardIcon svg {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.cardQuestion {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--type-h4-family);
+  font-size: 14px;
+  font-weight: var(--type-h4-weight);
+  line-height: 20px;
+  color: var(--color-datavis-purple-100);
+}

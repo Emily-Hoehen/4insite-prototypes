@@ -125,17 +125,20 @@ export const MODES: {
  * touched. */
 export const TOOLS_MENU_ORDER: Exclude<OliviaView, "ask">[] = ["report", "presenter", "dashboard"];
 
-/** Header mode-icon order — Report, Presentation, then Dashboard, per
- * Figma node 2273:15746 ("Zero State"), which re-added a third header
- * icon for it. All three are one-click *site*-scoped shortcuts now —
- * Report opens the checklist modal (scope is never actually read
- * there); Presenter and Dashboard both go straight to the site-wide
- * version of their mode, same destination as HomeGreeting's own
- * "Site Presentation"/"Live Site Dashboard" cards (Dashboard briefly
- * had no header icon at all, back when it was still a page-only
- * output with no "which scope?" question of its own — see git
- * history on this constant). */
-export const HEADER_MODE_ORDER: Exclude<OliviaView, "ask">[] = ["report", "presenter", "dashboard"];
+/** Header mode-icon order — Report, then Presentation. Both are
+ * one-click *site*-scoped shortcuts — Report opens the checklist modal
+ * (scope is never actually read there); Presenter goes straight to the
+ * site-wide version of its mode, same destination as HomeGreeting's
+ * own "Site Presentation" card. Dashboard used to sit here too (Figma
+ * node 2273:15746, "Zero State") — removed per the decided direction:
+ * site-wide "Live Site Dashboard" is gone from the header and from
+ * HomeGreeting's own site-level card grid (see that component's doc
+ * comment); the only dashboard access left is page-scoped, via
+ * HomeGreeting's "View live dashboard of page" pill. "dashboard"
+ * itself is still a valid MODES id — TOOLS_MENU_ORDER and the
+ * page-level pill's own openMode("dashboard", …, "page") calls still
+ * need it — this constant just no longer surfaces it up here. */
+export const HEADER_MODE_ORDER: Exclude<OliviaView, "ask">[] = ["report", "presenter"];
 
 /** What Olivia knows about *why* she's being opened — drives which greeting AskView shows. */
 export type OliviaEntryContext = { kind: "home" } | { kind: "topic"; topic: OliviaTopic };
@@ -374,14 +377,14 @@ export function OliviaPanel({
             )}
           </button>
 
-          {/* Three one-click shortcuts, up top and always reachable —
-              Report, Presenter, Dashboard (HEADER_MODE_ORDER; see its own
-              doc comment). Report opens the checklist modal regardless of
-              scope; Presenter and Dashboard both go straight to the full
-              *site*-scoped version of their mode (Figma node 2196:15112's
-              own "Site Presentation" tooltip for Presenter) — the same
-              destination as the zero state's "Site Presentation"/"Live
-              Site Dashboard" cards. Presenting/viewing *this page*
+          {/* Two one-click shortcuts, up top and always reachable —
+              Report, Presenter (HEADER_MODE_ORDER; see its own doc
+              comment, including why Dashboard no longer sits here).
+              Report opens the checklist modal regardless of scope;
+              Presenter goes straight to the full *site*-scoped version
+              of its mode (Figma node 2196:15112's own "Site
+              Presentation" tooltip) — the same destination as the zero
+              state's "Site Presentation" card. Presenting *this page*
               instead is only reachable from the zero state's page-level
               row, not the header. "panelContext" moves this same set
               into the composer's Tools menu instead (see AskView), so
@@ -395,14 +398,7 @@ export function OliviaPanel({
                     <ModeMenuButton
                       key={mode.id}
                       icon={mode.icon}
-                      // Report/Presenter's own MODES labels already read as
-                      // site-scoped ("Generate Offline Report", "Site
-                      // Presentation"); Dashboard's shared label ("Live
-                      // Dashboard", also used page-scoped in the Tools menu)
-                      // doesn't, so this header instance overrides it to
-                      // match HomeGreeting's own "Live Site Dashboard" card
-                      // instead of touching the shared MODES entry.
-                      label={mode.id === "dashboard" ? "Live Site Dashboard" : mode.label}
+                      label={mode.label}
                       onClick={() => session.pickMode(mode.id, mode.id === "report" ? "page" : "site")}
                     />
                   );
@@ -458,12 +454,14 @@ export function OliviaPanel({
               onSend={(text) => session.sendMessage(text)}
               onSelectPrompt={(t, q) => session.askTopic(t, q)}
               onOpenMode={session.openMode}
+              onPickSuggestion={session.askPersonalizedSuggestion}
               renderZeroState={
                 variant === "panelContext"
                   ? () => (
                       <PanelContextGreeting
                         onPickTopic={(t, q) => session.askTopic(t, q)}
                         onOpenMode={(mode, scope) => session.openMode(mode, topic, scope)}
+                        onPickSuggestion={session.askPersonalizedSuggestion}
                         promptSet={entryContext.kind === "topic" ? TOPIC_SUGGESTED_PROMPTS[entryContext.topic] : undefined}
                         performanceLabel={
                           initialTopic === "safety"
