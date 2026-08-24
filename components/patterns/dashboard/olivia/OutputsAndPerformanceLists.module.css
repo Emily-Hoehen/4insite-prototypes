@@ -192,7 +192,12 @@
    yellow-orange, same two accents as before (see git history for the
    earlier tinted-well version, node 2281:20356/2255:45851) but as a
    plain 24px icon with no background well behind it — one less visual
-   layer competing with the card's own border. */
+   layer competing with the card's own border. Glyph size briefly
+   matched PersonalizedSuggestions' own .cardIcon/.promptPillIcon
+   exactly (14px, down from 20px/"FA/24px" per Figma's own literal spec
+   for this card) — nudged back up to 18px per the user's own request,
+   splitting the difference: still smaller than the original 20px, but
+   a little more present than the other two icon groups' 14px. */
 .outputIconPlain {
   display: flex;
   align-items: center;
@@ -204,7 +209,7 @@
 
 .outputIconPlain i,
 .outputIconPlain svg {
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1;
 }
 
@@ -328,29 +333,36 @@
   background-color: rgba(217, 128, 255, 0.25);
 }
 
-/* The zero state's own page-level pills (Figma node 2281:20356)
-   tighten the icon-to-label gap and switch to one uniform 12px padding
-   instead of .promptPill's own 8px gap / 12px-16px padding — applied
-   as a second class alongside whichever color variant a pill already
-   uses (e.g. `[promptPillPrimaryBlue, promptPillTight]`), not a
-   composed replacement for it, since it only overrides these two
-   properties. */
+/* The zero state's own page-level pills (Figma node 2281:20356) used
+   to tighten the icon-to-label gap to 4px and switch to one uniform
+   12px padding instead of .promptPill's own 8px gap / 12px-16px
+   padding — the gap is now 8px instead (briefly 12px — see git
+   history — then nudged back down a tad per the user's own request),
+   matching PersonalizedSuggestions' own .card gap so the icon-to-
+   prompt spacing still reads the same across the whole zero state;
+   padding stays the tighter 12px uniform. Applied as a second class
+   alongside whichever color variant a pill already uses (e.g.
+   `[promptPillPrimaryBlue, promptPillTight]`), not a composed
+   replacement for it, since it only overrides these two properties. */
 .promptPillTight {
-  gap: 4px;
+  gap: 8px;
   padding: 12px;
 }
 
+/* Fixed 24px box — was sized purely by its own glyph before, so each
+   icon's own natural advance width left these subtly misaligned
+   against each other and against the 24px boxes elsewhere on the zero
+   state (PersonalizedSuggestions' own .cardIcon, .outputIconPlain
+   above). Same box, same 14px glyph, everywhere now. */
 .promptPillIcon {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
 }
 
-/* FA/16px per the current zero-state reference (2273:15746) — down
-   from 18px, per the user's own edit shrinking these page-level pill
-   icons. Same "labeled size vs. actual glyph size" gap as
-   .outputCardIcon's 20px-for-"FA/24px" above; FA/16px renders at 14px. */
 .promptPillIcon i,
 .promptPillIcon svg {
   font-size: 14px;

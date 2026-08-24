@@ -33,11 +33,14 @@
 
 /* Same flat purple tint as OutputsAndPerformanceLists' own
    .promptPill (rgba(175, 153, 255, 0.15)) — icon-left, question-right,
-   one row, vertically centered. */
+   one row, vertically centered. gap: 8px (down from 12px) per the
+   user's own request — kept in step with .promptPillTight's own
+   identical reduction below, so the icon-to-prompt spacing still
+   matches across Personalized Suggestions and Page level insights. */
 .card {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
   padding: 12px 16px;
   border: none;
