@@ -24,7 +24,7 @@ import { QualityMegaMenu } from "./QualityMegaMenu";
 import { CommunicationCenterFullScreen } from "./CommunicationCenterFullScreen";
 import { OliviaPanel } from "./olivia/OliviaPanel";
 import type { OliviaOpenRequest, OliviaVariant, ReportFlowVariant } from "./olivia/OliviaPanel";
-import { PERSONALIZED_SUGGESTIONS, QUALITY_PAGE_SUMMARY, type OliviaTopic, type ServiceAnalysis } from "./olivia/oliviaContent";
+import { QUALITY_PAGE_SUMMARY, type OliviaTopic, type ServiceAnalysis } from "./olivia/oliviaContent";
 import { useOliviaSession } from "./olivia/useOliviaSession";
 import { CommunicationCenterPanel } from "./olivia/CommunicationCenterPanel";
 import type { CommCenterOpenRequest } from "./olivia/CommunicationCenterPanel";
@@ -385,7 +385,6 @@ export function OliviaDashboard({
             onOliviaClick={showNavOliviaAvatar ? openOlivia : undefined}
             oliviaImageSrc={showNavOliviaAvatar ? "/dashboard/Olivia Avatar.png" : undefined}
             oliviaHasNotification={showNavOliviaAvatar && (hasUnseenQualitySummary || hasUnseenSuggestions)}
-            oliviaNotificationCount={showNavOliviaAvatar && hasUnseenSuggestions ? PERSONALIZED_SUGGESTIONS.length : undefined}
             utilityItems={[
               { icon: <StoreIcon />, label: "Store" },
               { icon: <PlusIcon />, label: "Quick entries" },
@@ -506,7 +505,6 @@ export function OliviaDashboard({
             onClick={toggleFabModal}
             isOpen={isFabModalOpen}
             hasNotification={hasUnseenQualitySummary || hasUnseenSuggestions}
-            notificationCount={hasUnseenSuggestions ? PERSONALIZED_SUGGESTIONS.length : undefined}
           />
           <OliviaFabModal
             isOpen={isFabModalOpen}
@@ -529,7 +527,6 @@ export function OliviaDashboard({
           onClick={openOliviaViaFab}
           isOpen={isOliviaOpen}
           hasNotification={hasUnseenQualitySummary || hasUnseenSuggestions}
-          notificationCount={hasUnseenSuggestions ? PERSONALIZED_SUGGESTIONS.length : undefined}
         />
       )}
     </>
