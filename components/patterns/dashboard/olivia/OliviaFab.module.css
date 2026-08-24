@@ -43,29 +43,6 @@
   pointer-events: none;
 }
 
-/* Same spot/purple as .notificationDot, sized to carry a count instead
-   — how many personalized suggestions are waiting (see
-   PERSONALIZED_SUGGESTIONS), same "dot vs. count" split as Nav's own
-   .oliviaNotificationBadge. */
-.notificationBadge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 6px;
-  border-radius: 100px;
-  background-color: var(--color-datavis-purple-100);
-  border: 2px solid var(--color-neutral-900);
-  color: var(--color-text-dt-default-inverted);
-  font-family: var(--type-h4-family);
-  font-size: 12px;
-  font-weight: var(--type-h4-weight);
-  line-height: 18px;
-  text-align: center;
-  pointer-events: none;
-}
-
 .pulse .fab::before {
   content: "";
   position: absolute;
