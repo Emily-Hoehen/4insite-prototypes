@@ -2,52 +2,60 @@
 
 import { BullhornIcon, FinancialsIcon, ListIcon, PdfIcon, VolumeIcon } from "../../icons";
 import {
+  PERSONALIZED_SUGGESTIONS,
   PersonalizedSuggestion,
   SUGGESTED_PROMPTS,
   type OliviaScope,
   type OliviaTopic,
   type SuggestedPrompt,
 } from "./oliviaContent";
-import type { OliviaView } from "./OliviaPanel";
 import { OliviaAvatar } from "./OliviaAvatar";
-import { PersonalizedSuggestions } from "./PersonalizedSuggestions";
+import type { OliviaView } from "./OliviaPanel";
+import { PersonalizedSuggestionButton } from "./PersonalizedSuggestions";
 import styles from "./OliviaViews.module.css";
 import outputStyles from "./OutputsAndPerformanceLists.module.css";
 
 /**
- * "panelIcons"'s zero-state — Figma node 2281:20356 ("Zero State"): a
- * row hero (avatar + greeting), then three sections: site-level outputs,
+ * "panelIcons"'s zero-state — Figma node 2364:32149 ("Personalized
+ * Suggestions"): a 70px avatar beside a two-line greeting (node
+ * 2369:32700 — distinct from the header's own smaller 36px avatar
+ * above it, see OliviaPanel), then three sections: site-level outputs,
  * page-level outputs (Summarize/Dashboard/Present, scoped to *this*
- * page), and the usual suggested-prompts pill list. Each mode/scope
- * pair gets its own dedicated row/card here rather than one button plus
- * a "this page or the whole site?" menu — the explicit split doesn't
- * fit OutputsAndPerformanceLists' one-list-of-modes shape (used by
- * PanelContextGreeting, unchanged), so this screen's markup is bespoke;
- * it reuses that file's own grid/pill CSS classes directly rather than
- * duplicating the same visual language in a second stylesheet — see
- * OutputsAndPerformanceLists.module.css's own doc comment on those
- * classes.
+ * page), and one merged "Suggested Prompts" list. Each mode/scope pair
+ * gets its own dedicated row/card here rather than one button plus a
+ * "this page or the whole site?" menu — the explicit split doesn't fit
+ * OutputsAndPerformanceLists' one-list-of-modes shape (used by
+ * PanelContextGreeting, unchanged), so this screen's markup is
+ * bespoke; it reuses that file's own grid/pill CSS classes directly
+ * rather than duplicating the same visual language in a second
+ * stylesheet — see OutputsAndPerformanceLists.module.css's own doc
+ * comment on those classes.
  *
  * Site-level is a 2-up card grid, left-aligned content, each card
  * carrying its own plain icon color (teal/yellow-orange, no tinted
  * well behind it — see OutputsAndPerformanceLists.module.css's own
  * .outputIconPlain doc comment) per this reference — reading "Generate
  * an Offline Report" (two lines) / "Start a Site Presentation" (two
- * lines). (A third card, "Live Site
- * Dashboard", used to sit here — removed per the decided direction:
- * site-wide dashboard access now only lives in the header's own mode
- * icons... except that's gone too, see HEADER_MODE_ORDER's own doc
- * comment — page-scoped dashboard access is the only one kept, via the
- * pill just below.) Page-level is a vertical stack of tight,
- * per-item-colored pills, reading "Summarize this page" / "View live
- * dashboard of page" / "Present this page".
+ * lines). (A third card, "Live Site Dashboard", used to sit here —
+ * removed per the decided direction: site-wide dashboard access now
+ * only lives in the header's own mode icons... except that's gone too,
+ * see HEADER_MODE_ORDER's own doc comment — page-scoped dashboard
+ * access is the only one kept, via the pill just below.) Page-level is
+ * a vertical stack of tight, per-item-colored pills, reading
+ * "Summarize this page" / "View live dashboard of page" / "Present
+ * this page".
  *
- * Figma node 2279:16662 is this screen's own base state — the generic
- * "Or start with a suggested prompt" pill row at the bottom. Node
- * 2360:30996 is the same screen with Personalized Suggestions
- * (PersonalizedSuggestions) inserted above "Generate site level
- * outputs" instead — see showPersonalizedSuggestions below for which
- * one replaces which and why.
+ * "Suggested Prompts" used to split into two mutually-exclusive
+ * screens — a standalone "Personalized Suggestions" section (Figma
+ * node 2360:30996) swapped in for the generic prompt row on the Home
+ * entry context — see git history. This pull folds them into one list
+ * instead: PERSONALIZED_SUGGESTIONS first (sparkle-tagged, home
+ * context only — see showPersonalizedSuggestions), then the ordinary
+ * SUGGESTED_PROMPTS pills, one shared header. Section rhythm: 40px
+ * between the three sections (plain .listsGroup), 16px from Site level
+ * outputs' own header to its cards (plain .section), but a tighter 12px
+ * from Page level insights'/Suggested Prompts' own headers to their
+ * first pill (.sectionTight) — see OutputsAndPerformanceLists.module.css.
  */
 export function HomeGreeting({
   onPickTopic,
@@ -56,7 +64,7 @@ export function HomeGreeting({
   onPickSuggestion,
   showPersonalizedSuggestions = true,
   promptSet = SUGGESTED_PROMPTS,
-  performanceLabel = "Or start with a suggested prompt",
+  performanceLabel = "Suggested Prompts",
 }: {
   onPickTopic: (topic: OliviaTopic, questionText?: string) => void;
   /** Report always opens the checklist modal regardless of scope (see
@@ -67,17 +75,15 @@ export function HomeGreeting({
    * and isn't a mode switch either (see useOliviaSession's
    * generatePageSummary) — its own dedicated action. */
   onSummarizePage?: () => void;
-  /** Picking one of PersonalizedSuggestions' own rows — see
+  /** Picking one of PERSONALIZED_SUGGESTIONS' own rows — see
    * useOliviaSession's askPersonalizedSuggestion. */
   onPickSuggestion?: (suggestion: PersonalizedSuggestion) => void;
-  /** Personalized Suggestions is a *home*-level read on the user (see
-   * PERSONALIZED_SUGGESTIONS) — it doesn't make sense once Olivia's
+  /** Personalized suggestions are a *home*-level read on the user (see
+   * PERSONALIZED_SUGGESTIONS) — they don't make sense once Olivia's
    * already scoped to one topic (e.g. opened from the Safety page), so
    * AskView only passes true for the general "home" entry context;
-   * topic-scoped opens keep the generic suggested-prompt row instead
-   * (Figma node 2279:16662), same as before Personalized Suggestions
-   * existed. Swaps which of the two bottom sections renders, per Figma
-   * node 2360:30996 — never both at once. */
+   * topic-scoped opens show only their own promptSet, same as before
+   * personalized suggestions existed. */
   showPersonalizedSuggestions?: boolean;
   /** Defaults to the mixed safety/complaint/audit set; the Safety page
    * passes SAFETY_SUGGESTED_PROMPTS instead, once Olivia already knows
@@ -87,9 +93,9 @@ export function HomeGreeting({
   performanceLabel?: string;
 }) {
   return (
-    <div className={[styles.homeGreeting, showPersonalizedSuggestions ? styles.homeGreetingGapTight : ""].join(" ")}>
+    <div className={styles.homeGreeting}>
       <div className={styles.homeGreetingHeroRow}>
-        <OliviaAvatar size={70} alt="Olivia" />
+        <OliviaAvatar size={70} />
         <div className={styles.homeGreetingTextRow}>
           <p className={styles.greetingHeadline}>
             Hi Emily,
@@ -99,14 +105,7 @@ export function HomeGreeting({
         </div>
       </div>
 
-      <div
-        className={[
-          outputStyles.listsGroup,
-          showPersonalizedSuggestions ? outputStyles.listsGroupTight : outputStyles.listsGroupWide,
-        ].join(" ")}
-      >
-        {showPersonalizedSuggestions && <PersonalizedSuggestions onPick={onPickSuggestion} />}
-
+      <div className={outputStyles.listsGroup}>
         <div className={outputStyles.section}>
           <p className={outputStyles.sectionLabelBold}>Site level outputs</p>
           <div className={outputStyles.outputGrid}>
@@ -133,7 +132,7 @@ export function HomeGreeting({
           </div>
         </div>
 
-        <div className={outputStyles.section}>
+        <div className={[outputStyles.section, outputStyles.sectionTight].join(" ")}>
           <p className={outputStyles.sectionLabelBold}>Page level insights</p>
           <div className={outputStyles.pillList}>
             <button
@@ -169,23 +168,25 @@ export function HomeGreeting({
           </div>
         </div>
 
-        {!showPersonalizedSuggestions && (
-          <div className={outputStyles.section}>
-            <p className={outputStyles.sectionLabelBold}>{performanceLabel}</p>
-            <div className={outputStyles.pillList}>
-              {promptSet.map((prompt) => (
-                <button
-                  key={prompt.topic}
-                  type="button"
-                  className={outputStyles.promptPill}
-                  onClick={() => onPickTopic(prompt.topic, prompt.question)}
-                >
-                  {prompt.label}
-                </button>
+        <div className={[outputStyles.section, outputStyles.sectionTight].join(" ")}>
+          <p className={outputStyles.sectionLabelBold}>{performanceLabel}</p>
+          <div className={outputStyles.pillList}>
+            {showPersonalizedSuggestions &&
+              PERSONALIZED_SUGGESTIONS.map((suggestion) => (
+                <PersonalizedSuggestionButton key={suggestion.id} suggestion={suggestion} onPick={onPickSuggestion} />
               ))}
-            </div>
+            {promptSet.map((prompt) => (
+              <button
+                key={prompt.topic}
+                type="button"
+                className={outputStyles.promptPill}
+                onClick={() => onPickTopic(prompt.topic, prompt.question)}
+              >
+                {prompt.label}
+              </button>
+            ))}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

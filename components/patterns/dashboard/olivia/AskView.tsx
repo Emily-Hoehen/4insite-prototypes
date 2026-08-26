@@ -195,6 +195,28 @@ export function AskView({
   // always scrolling the log container to its own bottom.
   const lastMessageRef = useRef<HTMLDivElement>(null);
 
+  /** Whether .log has content below its own visible bottom edge right
+   * now — drives .logFade (below). Most replies are short enough to
+   * fit without scrolling, but a tall one (SummaryPager's own
+   * service/quality analysis card especially — see the "don't
+   * auto-scroll" branch just below) can leave its own closing content
+   * (View Verification, Edit, the Reset/Rate row) sitting past the
+   * fold with nothing on screen to suggest it's there — the composer
+   * sits flush below .log either way, so a hard clip there reads as
+   * the panel just ending mid-card rather than "scroll for more."
+   * Recomputed on every scroll and whenever the content itself could
+   * have changed height (new/updated messages, thinking indicator). */
+  const [hasMoreBelow, setHasMoreBelow] = useState(false);
+
+  const updateScrollHint = () => {
+    const el = scrollRef.current;
+    if (!el) {
+      setHasMoreBelow(false);
+      return;
+    }
+    setHasMoreBelow(el.scrollHeight - el.clientHeight - el.scrollTop > 4);
+  };
+
   useEffect(() => {
     // Don't auto-scroll when Olivia's proactive Quality summary — or a
     // single service's own unprompted analysis, same reasoning — is
@@ -228,6 +250,21 @@ export function AskView({
     // that follows it, both still scroll to the bottom — the standard
     // "show me what I just did" beat before Olivia's reply lands.
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages, isThinking]);
+
+  // Recomputes .logFade's own visibility after every render that could
+  // change .log's content height — independent of the scroll effect
+  // above (which deliberately returns early, without scrolling, for
+  // qualitySummary/serviceAnalysis) so the hint still shows up for
+  // exactly the tall-card case that motivated it. A rAF, not a plain
+  // call: `messages`/`isThinking` changing is what triggers this
+  // effect, but the DOM hasn't necessarily reflowed to its new content
+  // height yet at that instant — one frame later, layout has settled
+  // and scrollHeight reads correctly.
+  useEffect(() => {
+    const frame = requestAnimationFrame(updateScrollHint);
+    return () => cancelAnimationFrame(frame);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages, isThinking]);
 
   // Close the Tools menu on any click outside it.
@@ -301,7 +338,8 @@ export function AskView({
             )}
           </div>
         ) : (
-          <div className={styles.log} ref={scrollRef} aria-live="polite">
+          <div className={styles.logWrap}>
+            <div className={styles.log} ref={scrollRef} onScroll={updateScrollHint} aria-live="polite">
             <div className={styles.logMessages}>
             {messages.map((message) => {
               const isLast = message === lastMessage;
@@ -479,6 +517,16 @@ export function AskView({
                 </div>
               </div>
             )}
+            </div>
+            {/* Hints that .log has more content past its own visible
+                bottom edge — see hasMoreBelow's own comment above. A
+                sibling of .log within .logWrap (not a child of .log
+                itself), so it stays pinned to .log's visible viewport
+                rather than scrolling away with the content it's fading
+                out — see .logFade's own comment in
+                OliviaViews.module.css for why that positioning needs
+                this extra wrapper. */}
+            {hasMoreBelow && <div className={styles.logFade} aria-hidden="true" />}
           </div>
         )}
 

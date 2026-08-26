@@ -1,0 +1,53 @@
+/* Anchored to the same right:24px edge as OliviaFab, stacked directly
+   above it — 24px (FAB's own bottom offset) + 56px (FAB size) + 16px
+   breathing room = 96px. z-index sits just under the FAB's own 61 so
+   the avatar stays the topmost element in this corner. */
+.stack {
+  position: fixed;
+  right: 24px;
+  bottom: 96px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 320px;
+}
+
+/* Opaque (not the panel's own translucent purple tint) — this floats
+   directly over whatever the page underneath happens to show, so it
+   needs to read clearly regardless of what's behind it, the same
+   reasoning as the FAB's own elevation shadow. */
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: fit-content;
+  padding: 12px 16px;
+  border: 1px solid rgba(175, 153, 255, 0.35);
+  border-radius: 8px;
+  background-color: var(--color-neutral-800);
+  box-shadow: var(--shadow-dt-popup-menu);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.chip:hover {
+  background-color: var(--color-neutral-700);
+}
+
+.chipText {
+  font-family: var(--type-h4-family);
+  font-size: 14px;
+  font-weight: var(--type-h4-weight);
+  line-height: 20px;
+  color: var(--color-datavis-purple-100);
+  text-align: left;
+}
+
+.chipSparkle {
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--color-datavis-purple-100);
+}

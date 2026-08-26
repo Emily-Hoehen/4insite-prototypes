@@ -82,20 +82,6 @@
   text-align: center;
 }
 
-/* HomeGreeting's own row-hero variant (Figma node 2279:16662) shares
-   .homeGreeting's own 48px hero-to-lists gap normally — this only
-   tightens it to 32px once Personalized Suggestions is showing (Figma
-   node 2360:30996), which also tightens OutputsAndPerformanceLists'
-   own .listsGroup the same amount (see that file's own
-   .listsGroupTight) — less room, more content, so both gaps shrink
-   together rather than just one. Scoped to a second class rather than
-   editing .homeGreeting directly, since PanelContextGreeting still
-   uses that shared class's own 48px unconditionally for its own
-   stacked hero. */
-.homeGreetingGapTight {
-  gap: 32px;
-}
-
 .homeGreetingHero {
   display: flex;
   flex-direction: column;
@@ -121,30 +107,28 @@
   text-align: center;
 }
 
-/* ---------------- Home greeting, row hero (Figma node 2281:20356,
-   "Zero State") ----------------
-   HomeGreeting's own hero: avatar and greeting sit side by side (not
-   stacked/centered) at a smaller 70px avatar size, left-aligned.
-   PanelContextGreeting keeps the stacked .homeGreetingHero/
-   .homeGreetingText treatment above — this is a separate pair of
-   classes rather than a modifier on those, so the two greetings can't
-   drift into each other by accident. */
+/* ---------------- Home greeting, avatar + left-aligned text row
+   (Figma node 2364:32149, "Personalized Suggestions") ----------------
+   A 70px avatar (node 2369:32701) beside the two-line greeting (node
+   2369:32702), left-aligned as a row — distinct from
+   PanelContextGreeting's own stacked, centered .homeGreetingHero/
+   .homeGreetingText treatment above (avatar over text, both centered);
+   kept as a separate pair of classes rather than a modifier on those,
+   so the two greetings can't drift into each other by accident. */
 .homeGreetingHeroRow {
   display: flex;
-  flex-direction: row;
   align-items: center;
   gap: 24px;
   width: 100%;
-  text-align: left;
 }
 
 .homeGreetingTextRow {
   display: flex;
   flex: 1;
+  min-width: 0;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  min-width: 0;
 }
 
 /* Headers/H2 per Figma (Lato Black 20px) — smaller and left-aligned,
@@ -239,6 +223,23 @@
   overflow: hidden;
 }
 
+/* Wraps .log (below) on the "has a conversation" branch only, purely so
+   .logFade has a `position: relative` box to anchor to that exactly
+   matches .log's own rendered viewport — .log itself can't be that
+   anchor, since it's the scrolling element: a `position: absolute`
+   child of .log would sit relative to .log's full *scrollable*
+   content box (i.e. glued to the bottom of everything, scrolling away
+   with it) rather than staying pinned to .log's *visible* bottom edge
+   the way .logFade needs to. flex/min-height: 0 here (not on .log)
+   is what actually reserves the space .log then fills at flex: 1. */
+.logWrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 /* The scroll container. Holds one child on the zero-state branch (the
    greeting), or two once a conversation starts: .logMessages plus
    .suggestedFooter (see that class's own comment) — gap is the FLOOR
@@ -252,6 +253,30 @@
   flex-direction: column;
   gap: 32px;
   padding: 24px 16px;
+}
+
+/* Signals .log has content past its own visible bottom edge — see
+   AskView's own hasMoreBelow comment for when this shows. A tall reply
+   (SummaryPager's service/quality analysis card especially, which
+   deliberately opens scrolled to its own top rather than its bottom —
+   see AskView's scroll effect) used to end in a hard clip flush against
+   .chatCardFooter, indistinguishable from the panel just ending
+   mid-card; this fades the last few pixels of .log into .chatCard's own
+   background instead, the same "there's more, scroll for it" cue a
+   native scroll shadow gives for free. Sits inside .logWrap, not .log
+   itself (see that class's own comment) — pointer-events: none so it
+   never blocks scrolling/clicking through to whatever it's fading. No
+   border/divider stroke, matching .chatCardFooter's own "no divider
+   between them" per the user's earlier request — this fades color, it
+   doesn't draw a line. */
+.logFade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(40, 48, 56, 0), var(--color-neutral-800));
+  pointer-events: none;
 }
 
 /* The turns themselves — one entry per message (bubbleRow) plus the

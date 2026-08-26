@@ -1,8 +1,9 @@
 /* Wraps the output + performance sections together (whichever order),
-   40px apart — Figma node 2294:21839's own "lists" group gap (same
-   value as the hero-to-lists gap above it, set on .homeGreetingGap40 —
-   Figma nests these as two different groups but happens to use the
-   same spacing for both here). Only ever used by HomeGreeting. */
+   40px apart — Figma node 2294:21839's own "lists" group gap for
+   PanelContextGreeting, and (after a few back-and-forth pulls landing
+   back on the same number — see git history) HomeGreeting's own node
+   2364:32157 too, so both callers share this plain 40px directly now;
+   no HomeGreeting-only override left to keep in sync. */
 .listsGroup {
   display: flex;
   flex-direction: column;
@@ -10,26 +11,27 @@
   width: 100%;
 }
 
-/* HomeGreeting-only overrides (Figma node 2279:16662's own 48px base
-   gap, tightened to 32px once Personalized Suggestions is showing —
-   node 2360:30996). PanelContextGreeting keeps this class's own plain
-   40px, unmodified. Both must come after .listsGroup in this file so
-   their gap wins at equal specificity regardless of prop/className
-   order in HomeGreeting.tsx (same ordering rule as
-   .composerExpandedJoined's own doc comment, OliviaViews.module.css). */
-.listsGroupWide {
-  gap: 48px;
-}
-
-.listsGroupTight {
-  gap: 32px;
-}
-
+/* Header-to-content gap within one section — 16px, Site level outputs'
+   own value (node 2364:32190). Page level insights / Suggested Prompts
+   use the tighter .sectionTight (below) instead — see its own comment. */
 .section {
   display: flex;
   flex-direction: column;
   gap: 16px;
   width: 100%;
+}
+
+/* HomeGreeting-only: Page level insights and Suggested Prompts each
+   tighten their own header-to-content gap to 12px (nodes 2364:32206/
+   2364:32158) — unlike Site level outputs, which keeps .section's plain
+   16px above. A second class layered onto .section (like
+   .listsGroupWide used to be) rather than a variable on .section itself,
+   since PanelContextGreeting's own callers of .section still want 16px.
+   Must come after .section in this file so its gap wins at equal
+   specificity regardless of className order (same ordering rule as
+   .composerExpandedJoined's own doc comment, OliviaViews.module.css). */
+.sectionTight {
+  gap: 12px;
 }
 
 .sectionLabel {
@@ -242,14 +244,16 @@
   text-align: left;
 }
 
-/* Header/H4 (bold), white — not .sectionLabel's own smaller grey body
-   text — per the user's request for HomeGreeting's own group headers
-   ("Generate site level outputs", "View page level insights", "Or
-   start with a suggested prompt"). Overrides composed .sectionLabel's
-   font/color directly rather than editing that shared class, since
-   OutputsAndPerformanceLists' own callers still use the grey style.
-   Used to carry a small leading icon (globe/page-layout/comment) too
-   (hence the old name .sectionLabelWithIcon) — the current Figma
+/* Header/H4 (bold) — same neutral grey as .sectionLabel's own color
+   (#a7b1b9, per Figma node 2364:32149's latest pull), just bumped up to
+   H4's size/weight for HomeGreeting's own group headers ("Generate site
+   level outputs", "View page level insights", "Or start with a
+   suggested prompt"). Was white at one point — see git history —
+   before the user asked for this neutral grey instead, matching
+   .sectionLabel's own color exactly, so no color override is declared
+   here at all; only font-family/size/weight differ from the composed
+   class. Used to carry a small leading icon (globe/page-layout/comment)
+   too (hence the old name .sectionLabelWithIcon) — the current Figma
    reference (2273:15746) dropped those icons, so this is plain text
    now. */
 .sectionLabelBold {
@@ -257,7 +261,6 @@
   font-family: var(--type-h4-family);
   font-size: 14px;
   font-weight: var(--type-h4-weight);
-  color: var(--color-text-dt-default);
 }
 
 .pillList {
@@ -273,6 +276,11 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  /* Figma's own pill nodes (page-level insights 2364:32196, generic
+     suggested prompts 2369:32654/2369:32662) spec these as `w-full` —
+     tried that, but per the user's own request these stay sized to
+     their own content instead, not stretched edge-to-edge across the
+     panel. */
   width: fit-content;
   height: 40px;
   padding: 12px 16px;
