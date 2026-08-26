@@ -12,13 +12,13 @@ export type OliviaTopic = "safety" | "complaint" | "audit";
  * A proactive, Olivia-authored suggestion based on what she already
  * knows about this user/site — distinct from SUGGESTED_PROMPTS (which
  * are generic starter questions anyone would see): these are framed as
- * Olivia's own idea ("Would you like me to…?"), grouped under a short
- * category label, per the reference screenshot's "Hey Mark, here are
- * your suggestions" panel (Site Scorecards / Staffing Details /
- * Performance Analysis). Picking one echoes `question` as if the user
- * asked it, then answers with `reply` — same turn-taking shape as
- * SUGGESTED_PROMPTS, just with its own canned reply instead of routing
- * through matchTopic (see useOliviaSession's askPersonalizedSuggestion).
+ * Olivia's own idea, tagged with a trailing sparkle wherever they show
+ * up (the zero state's "Suggested Prompts" list, and the floating
+ * preview above the FAB — see OliviaSuggestionsPreview). Picking one
+ * echoes `question` as if the user asked it, then answers with `reply`
+ * — same turn-taking shape as SUGGESTED_PROMPTS, just with its own
+ * canned reply instead of routing through matchTopic (see
+ * useOliviaSession's askPersonalizedSuggestion).
  */
 export type PersonalizedSuggestion = {
   id: string;
@@ -30,38 +30,33 @@ export type PersonalizedSuggestion = {
   reply: string;
 };
 
-/** Three suggestions, matching the reference screenshot's own category
- * set — figures pulled from SITE_OVERVIEW/PAGE_SUMMARY_SECTIONS below
- * so they stay consistent with everything else Olivia already knows
- * about Detroit, MI (DTW). Order (Staffing, Performance, Scorecard)
- * and copy match Figma node 2360:30996's latest pull — `question` is
- * an imperative statement for all three now, not a literal question,
- * but it's still echoed as the user's own turn when picked (see
+/** Two suggestions now (a third, "Site Scorecard", sat here before —
+ * see git history — dropped per Figma node 2364:32149's own pull,
+ * which folds these into the zero state's single "Suggested Prompts"
+ * list, tagged with a trailing sparkle, alongside the generic
+ * SUGGESTED_PROMPTS pills, plus a floating preview above the FAB
+ * before Olivia's ever opened — see OliviaSuggestionsPreview). Figures
+ * pulled from SITE_OVERVIEW below so they stay consistent with
+ * everything else Olivia already knows about Detroit, MI (DTW).
+ * `question` is an imperative statement, not a literal question, but
+ * it's still echoed as the user's own turn when picked (see
  * useOliviaSession's askPersonalizedSuggestion) — the field name
  * describes its role, not its grammar. `category` no longer renders
- * anywhere (see PersonalizedSuggestions' own per-suggestion icon,
- * keyed off `id`) but stays on the data for its aria-label. */
+ * anywhere but stays on the data for its aria-label. */
 export const PERSONALIZED_SUGGESTIONS: PersonalizedSuggestion[] = [
   {
     id: "staffingDetails",
     category: "Staffing Details",
-    question: "Run a deeper analysis on my current staff breakdown to help with planning.",
+    question: "Run an analysis on my current staff breakdown.",
     reply:
       "You're at 239 employees on staff with 10% turnover this month — 14 new hires against 12 separations. Same-day coverage is holding at 100% of scope of work assigned across all 166 routes.",
   },
   {
     id: "performanceAnalysis",
     category: "Performance Analysis",
-    question: "Take another look at the scorecard analysis to see if there have been any recent performance shifts.",
+    question: "Look at the scorecard analysis to see if there have been any recent performance shifts.",
     reply:
       "Performance is trending ahead of the network: 150 days recordable-free and a 3.55 average audit score across 11 areas, both above benchmark. Complaint volume is down 8% year-over-year, so nothing's slipping this cycle.",
-  },
-  {
-    id: "siteScorecards",
-    category: "Site Scorecard",
-    question: "Pull up the latest summary for the site scorecards page.",
-    reply:
-      "Detroit, MI (DTW) is averaging 3.56 / 5.00 on the site scorecard, factoring in audits, complaints, and service validation over the last 6 months — 0.15 above the SBM network benchmark.",
   },
 ];
 

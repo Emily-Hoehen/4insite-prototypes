@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef } from "react";
 import { BullhornIcon, CloseIcon, FinancialsIcon, PdfIcon, RotateLeftIcon } from "../../icons";
-import { OliviaScope, OliviaTopic, ServiceAnalysis, TOPIC_SUGGESTED_PROMPTS } from "./oliviaContent";
+import { OliviaScope, OliviaTopic, PersonalizedSuggestion, ServiceAnalysis, TOPIC_SUGGESTED_PROMPTS } from "./oliviaContent";
 import { AskView } from "./AskView";
 import { PresenterView } from "./PresenterView";
 import { ModeMenuButton } from "./ModeMenuButton";
@@ -161,9 +161,13 @@ export type OliviaEntryContext = { kind: "home" } | { kind: "topic"; topic: Oliv
  * `serviceAnalysis` is the same idea scoped to one clicked service
  * event instead of a whole page — ServiceHistoryModal's own trigger
  * (see OliviaDashboard's analyzeServiceFromOverlay), same priority as
- * `pageSummary`; the two are mutually exclusive by construction (never
- * both set on the same request), so their relative order below doesn't
- * matter.
+ * `pageSummary`. `personalizedSuggestion` is the same idea again for
+ * OliviaSuggestionsPreview's own floating chips (see OliviaDashboard's
+ * openOliviaWithSuggestion) — picking one asks it immediately, same as
+ * clicking the matching row inside the zero state's own "Suggested
+ * Prompts" list. All three are mutually exclusive by construction
+ * (never more than one set on the same request), so their relative
+ * order below doesn't matter.
  */
 export type OliviaOpenRequest = OliviaEntryContext & {
   requestId: number;
@@ -171,6 +175,7 @@ export type OliviaOpenRequest = OliviaEntryContext & {
   resumeReply?: string;
   pageSummary?: string;
   serviceAnalysis?: ServiceAnalysis;
+  personalizedSuggestion?: PersonalizedSuggestion;
 };
 
 export function OliviaPanel({
@@ -327,6 +332,11 @@ export function OliviaPanel({
       // prototype, so its rich-card treatment is hardcoded here rather
       // than threaded through OliviaOpenRequest as a general-purpose flag.
       session.showPageSummary(openRequest.pageSummary, "qualitySummary");
+    } else if (openRequest.personalizedSuggestion) {
+      // OliviaSuggestionsPreview's own floating chip, picked before
+      // Olivia was ever opened — asks it immediately, same as clicking
+      // the matching row inside the zero state itself.
+      session.askPersonalizedSuggestion(openRequest.personalizedSuggestion);
     } else if (openRequest.kind === "topic") {
       if (openRequest.resumeReply && openRequest.questionText) {
         session.loadConversation(openRequest.topic, openRequest.questionText, openRequest.resumeReply);

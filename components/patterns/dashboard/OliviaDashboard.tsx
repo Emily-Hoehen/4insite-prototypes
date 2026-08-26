@@ -24,12 +24,18 @@ import { QualityMegaMenu } from "./QualityMegaMenu";
 import { CommunicationCenterFullScreen } from "./CommunicationCenterFullScreen";
 import { OliviaPanel } from "./olivia/OliviaPanel";
 import type { OliviaOpenRequest, OliviaVariant, ReportFlowVariant } from "./olivia/OliviaPanel";
-import { QUALITY_PAGE_SUMMARY, type OliviaTopic, type ServiceAnalysis } from "./olivia/oliviaContent";
+import {
+  QUALITY_PAGE_SUMMARY,
+  type OliviaTopic,
+  type PersonalizedSuggestion,
+  type ServiceAnalysis,
+} from "./olivia/oliviaContent";
 import { useOliviaSession } from "./olivia/useOliviaSession";
 import { CommunicationCenterPanel } from "./olivia/CommunicationCenterPanel";
 import type { CommCenterOpenRequest } from "./olivia/CommunicationCenterPanel";
 import { OliviaFab } from "./olivia/OliviaFab";
 import { OliviaFabModal } from "./olivia/OliviaFabModal";
+import { OliviaSuggestionsPreview } from "./olivia/OliviaSuggestionsPreview";
 import { ALL_OLIVIA_VARIANTS, PrototypeSwitcher } from "./olivia/PrototypeSwitcher";
 import styles from "./OliviaDashboard.module.css";
 
@@ -267,6 +273,24 @@ export function OliviaDashboard({
     }
   };
 
+  /** OliviaSuggestionsPreview's own floating chips, picked before
+   * Olivia was ever opened — asks that suggestion immediately instead
+   * of landing on the zero state, same "unseen" flag as the FAB's own
+   * ping (picking one is exactly the kind of "seen it" moment that
+   * clears it). "fab" calls straight into fabSession, same reasoning
+   * as toggleFabModal; everything else goes through the real panel's
+   * openRequest (see OliviaPanel's own personalizedSuggestion branch). */
+  const openOliviaWithSuggestion = (suggestion: PersonalizedSuggestion) => {
+    setHasUnseenSuggestions(false);
+    if (oliviaVariant === "fab") {
+      setIsFabModalOpen(true);
+      fabSession.askPersonalizedSuggestion(suggestion);
+      return;
+    }
+    setIsOliviaOpen(true);
+    setOpenRequest({ kind: "home", requestId: Date.now(), personalizedSuggestion: suggestion });
+  };
+
   /** Contextual entry point — "Open Olivia" from a trigger's popover.
    * Option 3 (Embedded Triggers) only; see the onAskOlivia/onAskQuestion
    * props below, gated to that variant. */
@@ -501,6 +525,9 @@ export function OliviaDashboard({
 
       {oliviaVariant === "fab" && (
         <>
+          {!isFabModalOpen && hasUnseenSuggestions && (
+            <OliviaSuggestionsPreview onPick={openOliviaWithSuggestion} />
+          )}
           <OliviaFab
             onClick={toggleFabModal}
             isOpen={isFabModalOpen}
@@ -521,13 +548,19 @@ export function OliviaDashboard({
           direction (FAB entry + the full "panelIcons" panel), not a
           third panel design of its own. Suppressed while the mini
           presenter bar is up (see isPresenterMinimized) — it already
-          offers its own way back into the panel, at this exact spot. */}
+          offers its own way back into the panel, at this exact spot.
+          The suggestions preview shares the exact same visibility
+          gate, plus its own hasUnseenSuggestions check — no point
+          floating a preview of something already seen. */}
       {oliviaVariant === "fabPanel" && !isOliviaOpen && !isPresenterMinimized && (
-        <OliviaFab
-          onClick={openOliviaViaFab}
-          isOpen={isOliviaOpen}
-          hasNotification={hasUnseenQualitySummary || hasUnseenSuggestions}
-        />
+        <>
+          {hasUnseenSuggestions && <OliviaSuggestionsPreview onPick={openOliviaWithSuggestion} />}
+          <OliviaFab
+            onClick={openOliviaViaFab}
+            isOpen={isOliviaOpen}
+            hasNotification={hasUnseenQualitySummary || hasUnseenSuggestions}
+          />
+        </>
       )}
     </>
   );
